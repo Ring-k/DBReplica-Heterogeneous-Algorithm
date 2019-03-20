@@ -37,8 +37,9 @@ public class StimutaleAnneal {
 
   /**
    * Constructor
+   *
    * @param dataTable, info of the data table
-   * @param queries, workload
+   * @param queries,   workload
    */
   public StimutaleAnneal(DataTable dataTable, Query[] queries) {
     this.data = dataTable;
@@ -48,8 +49,9 @@ public class StimutaleAnneal {
 
   /**
    * Constructor
-   * @param dataTable, info of the data table
-   * @param queries, workload
+   *
+   * @param dataTable,     info of the data table
+   * @param queries,       workload
    * @param replicaNumber, number of replica
    */
   public StimutaleAnneal(DataTable dataTable, Query[] queries, int replicaNumber) {
@@ -59,15 +61,32 @@ public class StimutaleAnneal {
   }
 
 
+  /*
+   * Run the algorithm
+   * 1. initialize temperature
+   * 2. initialize a multi-replica solution,calculate the cost and record it
+   * 3. loop [check if global converge]
+   * 4.  | loop [check if local converge]
+   * 5.  |  | generate a new multi-replica solution
+   * 6.  |  | calculate the cost
+   * 7.  |  | if [choose this new multi-replica solution]
+   * 8.  |  |  | record the solution and cost
+   * 8.  |  | end if
+   * 9.  |  end loop
+   * 10. |  if [choose local optimal as global optimal]
+   * 11. |   |  update global optimal
+   * 12. |  else
+   * 13. |   |  increase same optimal counter
+   * 14. |  end if
+   * 15. |  decrease temperature
+   * 16. end loop
+   * 17. return optimal solution
+   */
   public MultiReplicas optimal() throws NoSuchAlgorithmException {
-    // set original temperature
     initTemperature();
-    // initialize original(random) solution
     multiReplicas = initSolution();
     optimalCost = CostModel.cost(multiReplicas, queries);
     costHistory.add(optimalCost);
-
-    // check if converge
     while (!isGlobalConverge()) {
       System.out.println(">>>>>>>t: " + temperature);
       MultiReplicas curMultiReplica = new MultiReplicas(multiReplicas);
@@ -98,7 +117,6 @@ public class StimutaleAnneal {
       } else {
         optimalCnt++;
       }
-      // decrease temperature
       decreaseTemperature();
     }
     try {
@@ -259,6 +277,7 @@ public class StimutaleAnneal {
 
   /**
    * Get the optimal cost after running algorithm
+   *
    * @return
    */
   public double getOptimalCost() {
@@ -267,6 +286,7 @@ public class StimutaleAnneal {
 
   /**
    * Get the record history of optimal cost.
+   *
    * @return the record history
    */
   public List<BigDecimal> getHistory() {
