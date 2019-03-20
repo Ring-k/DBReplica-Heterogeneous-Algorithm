@@ -19,27 +19,27 @@ import java.util.Map;
 
 public class StimutaleAnneal {
 
-  private static double temperature;
+  private double temperature;
 
   // the original data table
-  private static DataTable data;
+  private DataTable data;
 
   // the queries
-  private static Query[] queries;
+  private Query[] queries;
 
-  private static int replicaNumber;
+  private int replicaNumber;
 
   // the solution
-  private static MultiReplicas multiReplicas;
+  private MultiReplicas multiReplicas;
 
   // cost
-  private static BigDecimal optimalCost;
+  private BigDecimal optimalCost;
 
 
-  private static List<BigDecimal> costHistory = new ArrayList<>();
+  private List<BigDecimal> costHistory = new ArrayList<>();
 
-  private static int iteration = 0;
-  private static int optimalCnt = 0;
+  private int iteration = 0;
+  private int optimalCnt = 0;
 
 
   public StimutaleAnneal(DataTable datatable, Query[] queries) {
@@ -48,7 +48,7 @@ public class StimutaleAnneal {
     this.replicaNumber = Constant.REPLICA_NUMBER;
   }
 
-  public StimutaleAnneal(DataTable dataTable, Query[] queries, int replicaNumber){
+  public StimutaleAnneal(DataTable dataTable, Query[] queries, int replicaNumber) {
     this.data = dataTable;
     this.queries = queries;
     this.replicaNumber = replicaNumber;
@@ -76,9 +76,9 @@ public class StimutaleAnneal {
           curMultiReplica = newMultiReplica;
           curCost = newCost;
           costHistory.add(curCost);
-          System.out.println("iteration" + iteration + ": " + curCost.setScale(2, BigDecimal.ROUND_HALF_UP) + ", " + getOrder(curMultiReplica));
+          System.out.println("iteration" + iteration + ": " + curCost.setScale(2, BigDecimal.ROUND_HALF_UP) + ", " + curMultiReplica.getOrderString());
         } else {
-          System.out.println("iteration" + iteration + ": " + newCost.setScale(2, BigDecimal.ROUND_HALF_UP) + ", " + getOrder(newMultiReplica) + " drop");
+          System.out.println("iteration" + iteration + ": " + newCost.setScale(2, BigDecimal.ROUND_HALF_UP) + ", " + newMultiReplica.getOrderString() + " drop");
         }
         iteration++;
       }
@@ -159,29 +159,29 @@ public class StimutaleAnneal {
   }
 
 
-  private static boolean isChosen(BigDecimal newCost, BigDecimal oldCost) {
+  private boolean isChosen(BigDecimal newCost, BigDecimal oldCost) {
     if (newCost.compareTo(oldCost) == -1) return true;
     double threshold = Math.exp(oldCost.subtract(newCost).doubleValue() / temperature);
     if (Math.random() <= threshold) return true;
     return false;
   }
 
-  private static void decreaseTemperature() {
+  private void decreaseTemperature() {
     temperature *= Constant.TEMPERATURE_DECREASE_RATE;
   }
 
   // 收敛准则
-  private static boolean isGlobalConverge() {
+  private boolean isGlobalConverge() {
     return optimalCnt == 100;
   }
 
   // 抽样稳定准则
-  private static boolean isLocalConverge() {
+  private boolean isLocalConverge() {
     return temperature == 0
             || iteration == Constant.LOCAL_ITERATION_NUM;
   }
 
-  private static void initTemperature() {
+  private void initTemperature() {
     MultiReplicas m;
     BigDecimal max = null;
     BigDecimal min = null;
@@ -199,7 +199,7 @@ public class StimutaleAnneal {
             .doubleValue();
   }
 
-  private static MultiReplicas initSolution() {
+  private MultiReplicas initSolution() {
     MultiReplicas multiReplicas = new MultiReplicas();
     for (int i = 0; i < replicaNumber; i++)
       multiReplicas.add(new Replica(data, ArrayTransform.random(data.getColNum())));
@@ -211,37 +211,24 @@ public class StimutaleAnneal {
     return val >= lower && val < upper;
   }
 
-  public static String getOrder(Replica r) {
-    return Arrays.toString(r.getOrder());
-  }
-
-  public static String getOrder(MultiReplicas m) {
-    String ans = "";
-    for (Map.Entry<Replica, Integer> e : m.getReplicas().entrySet())
-      for (int i = 0; i < e.getValue(); i++)
-        ans += getOrder(e.getKey());
-    return ans;
-  }
-
-  public double getOptimalCost(){
+  public double getOptimalCost() {
     return optimalCost.doubleValue();
   }
 
-  public static List<BigDecimal> getHistory(){
+  public List<BigDecimal> getHistory() {
     return costHistory;
   }
 
-   private static void writeHistory() throws IOException {
+  private void writeHistory() throws IOException {
     File file = new File(Constant.HISTORY_STORE_PATH);
-    if(file.exists()) file.delete();
+    if (file.exists()) file.delete();
     file.createNewFile();
     PrintWriter pw = new PrintWriter(file);
-    for(BigDecimal c : costHistory)
+    for (BigDecimal c : costHistory)
       pw.println(c);
     pw.flush();
     pw.close();
   }
-
 
 
 }

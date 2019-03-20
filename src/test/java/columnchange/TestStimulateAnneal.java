@@ -14,6 +14,7 @@ import org.junit.Test;
 import java.io.*;
 import java.math.BigDecimal;
 import java.util.Arrays;
+import static org.junit.Assert.*;
 
 import static columnchange.TestDataTable.generateDataTable;
 import static columnchange.StimutaleAnneal.generateNewReplica;

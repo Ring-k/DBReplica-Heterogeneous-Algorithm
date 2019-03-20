@@ -2,11 +2,12 @@ package datamodel;
 
 import constant.Constant;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class DataTable {
+public class DataTable implements Serializable {
   private BigDecimal rowNum;
   private int colNum;
   private Histogram[] colHistograms;

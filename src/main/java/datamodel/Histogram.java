@@ -2,11 +2,12 @@ package datamodel;
 
 import constant.Constant;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class Histogram {
+public class Histogram implements Serializable {
 
   private double maxX, minX, intervalLength;
   private double[] xCoordinate;

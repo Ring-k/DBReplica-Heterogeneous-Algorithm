@@ -12,11 +12,12 @@ import replica.Replica;
 import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
+
+/**
+ * the experiment found out that evaluate cost is higher in SA, because SA used here replica num = 1
+ */
 public class DivgDesign {
 
   private int replicaNum = Constant.REPLICA_NUMBER;
@@ -45,7 +46,8 @@ public class DivgDesign {
    * @throws NoSuchAlgorithmException
    */
   public DivgDesign(DataTable data, Query[] queries,
-                    int replicaNum, int loadBalanceFactor, int maxIteration, double epsilone) throws NoSuchAlgorithmException {
+                    int replicaNum, int loadBalanceFactor, int maxIteration, double epsilone)
+          throws NoSuchAlgorithmException {
     this.data = new DataTable(data);
     this.replicaNum = replicaNum;
     this.loadBalanceFactor = loadBalanceFactor;
@@ -54,6 +56,7 @@ public class DivgDesign {
     this.workload = new Query[queries.length];
     System.arraycopy(queries, 0, workload, 0, workload.length);
     workloadSubsets = new List[replicaNum];
+    for(int i = 0; i < workloadSubsets.length; i++) workloadSubsets[i] = new ArrayList<>();
   }
 
   /**
@@ -68,6 +71,7 @@ public class DivgDesign {
     this.workload = new Query[queries.length];
     System.arraycopy(queries, 0, workload, 0, workload.length);
     workloadSubsets = new List[replicaNum];
+    for(int i = 0; i < workloadSubsets.length; i++) workloadSubsets[i] = new ArrayList<>();
   }
 
 
@@ -89,7 +93,7 @@ public class DivgDesign {
       // 2. check replicas generated before
       // get n configurations, and current total  cost
       for (int i = 0; i < replicaNum; i++)
-        multiReplicas[i] = (Replica) recommandReplica(workloadSubsets[i]).optimal().getReplicas().keySet().toArray()[0];
+        multiReplicas[i] = recommandReplica(workloadSubsets[i]);
       curCost = totalCost(multiReplicas);
 
       if (isIterationTerminate(it, curCost)) break;
@@ -100,6 +104,7 @@ public class DivgDesign {
       // 1. this is for next iteration
       // init sub workload sets for this iteration
       List<Query>[] curSubQueries = new List[replicaNum];
+      for(int i = 0; i < curSubQueries.length; i++) curSubQueries[i] = new ArrayList<>();
       // for each queries in workload
       for (int i = 0; i < workload.length; i++) {
         int[] order = getLeastCostConfOrder(multiReplicas, workload[i]);
@@ -117,24 +122,24 @@ public class DivgDesign {
   }
 
 
-  private void initDesign() {
+  public void initDesign() {// TODO private
     for (Query q : workload)
       for (int j = 0; j < loadBalanceFactor; j++)
         workloadSubsets[this.random.nextInt(workloadSubsets.length)]
                 .add(new Query(q).setWeight(q.getWeight() / loadBalanceFactor));
   }
 
-  private StimutaleAnneal recommandReplica(List<Query> queries) {
-    return new StimutaleAnneal(data, queries.toArray(new Query[0]), 1);
+   public Replica recommandReplica(List<Query> queries) { // TODO private
+    return (Replica) new StimutaleAnneal(data, queries.toArray(new Query[0]), 1).optimal().getReplicas().keySet().toArray()[0];
   }
 
-  private boolean isIterationTerminate(int curIteration, double curCost) {
+  public boolean isIterationTerminate(int curIteration, double curCost) {// TODO
     if (totalCost == 0 || curIteration == 0) return false;
     if (Math.abs(curCost - totalCost) < epsilone) return true;
     return curIteration >= maxIteration;
   }
 
-  private int[] getLeastCostConfOrder(Replica[] replicas, Query query) {
+  public int[] getLeastCostConfOrder(Replica[] replicas, Query query) {// TODO private
     Integer[] order = new Integer[replicaNum];
     for (int i = 0; i < order.length; i++) order[i] = i;
     BigDecimal[] costs = new BigDecimal[replicaNum];
@@ -145,7 +150,7 @@ public class DivgDesign {
     return res;
   }
 
-  private double totalCost(Replica[] mulReplicas) {
+  public double totalCost(Replica[] mulReplicas) {// TODO private
     BigDecimal ans = new BigDecimal("0");
     for (Query query : workload) {
       BigDecimal curCost = new BigDecimal("0");
@@ -153,11 +158,10 @@ public class DivgDesign {
       for (int i = 0; i < loadBalanceFactor; i++)
         curCost = curCost
                 .add(CostModel.cost(mulReplicas[order[i]], query)
-                        .multiply(BigDecimal.valueOf(query.getWeight()))
+                        .multiply(BigDecimal.valueOf((double) 1 / loadBalanceFactor))
                         .divide(BigDecimal.valueOf(loadBalanceFactor)));
       ans = ans.add(curCost);
     }
     return ans.doubleValue();
   }
-
 }
