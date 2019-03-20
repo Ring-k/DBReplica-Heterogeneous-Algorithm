@@ -22,8 +22,8 @@ package DivergentDesign;
 
 public class TestDivergentDesign {
 
-  @Test
-  public void testConstructor() throws NoSuchAlgorithmException {
+//  @Test
+//  public void testConstructor() throws NoSuchAlgorithmException {
 //    DataTable dataTable = generateDataTable();
 //    Query[] queries = new QueryGenerator(1000, dataTable).getQueries();
 //    DivgDesign dd = new DivgDesign(dataTable, queries);

@@ -7,62 +7,61 @@ import query.QueryGenerator;
 import replica.MultiReplicas;
 import replica.Replica;
 
-import static columnchange.StimutaleAnneal.generateNewMultiReplica;
 
 import org.junit.Test;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import static org.junit.Assert.*;
 
 import static columnchange.TestDataTable.generateDataTable;
-import static columnchange.StimutaleAnneal.generateNewReplica;
 
 public class TestStimulateAnneal {
 
 
 
 
-  @Test
-  public void testGenerateNewReplica() {
-    for(int i = 0; i < 100; i++) {
-      DataTable dataTable = generateDataTable();
-      int[] order = {0, 1, 2};
-      Replica r1 = new Replica(dataTable, order);
-      Replica r2 = generateNewReplica(r1);
-      System.out.print("r1 " + Arrays.toString(r1.getOrder()) + " ");
-      System.out.println("r2 " + Arrays.toString(r2.getOrder()));
-      r1 = null;
-      assertNotEquals(null, r2);
-    }
-  }
+//  @Test
+//  public void testGenerateNewReplica() {
+//    for(int i = 0; i < 100; i++) {
+//      DataTable dataTable = generateDataTable();
+//      int[] order = {0, 1, 2};
+//      Replica r1 = new Replica(dataTable, order);
+//      Replica r2 = generateNewReplica(r1);
+//      System.out.print("r1 " + Arrays.toString(r1.getOrder()) + " ");
+//      System.out.println("r2 " + Arrays.toString(r2.getOrder()));
+//      r1 = null;
+//      assertNotEquals(null, r2);
+//    }
+//  }
+//
+//  @Test
+//  public void testGenerateNewMultiReplica() {
+//    for(int i = 0; i < 10000; i++){
+//      DataTable dataTable = generateDataTable();
+//      int[] order1 = {0, 1, 2};
+//      int[] order2 = {1, 0, 2};
+//      int[] order3 = {1, 2, 0};
+//      MultiReplicas m = new MultiReplicas();
+//      m.add(new Replica(dataTable, order1))
+//              .add(new Replica(dataTable, order2))
+//              .add(new Replica(dataTable, order3));
+//      MultiReplicas exp = new MultiReplicas();
+//      exp.add(new Replica(dataTable, order1))
+//              .add(new Replica(dataTable, order2))
+//              .add(new Replica(dataTable, order3));
+//      MultiReplicas m1 = generateNewMultiReplica(m);
+//      MultiReplicas m2 = generateNewMultiReplica(m);
+//      assertEquals(exp, m);
+//      assertNotEquals(exp, m1);
+//      assertNotEquals(exp, m2);
+//    }
+//  }
 
   @Test
-  public void testGenerateNewMultiReplica() {
-    for(int i = 0; i < 10000; i++){
-      DataTable dataTable = generateDataTable();
-      int[] order1 = {0, 1, 2};
-      int[] order2 = {1, 0, 2};
-      int[] order3 = {1, 2, 0};
-      MultiReplicas m = new MultiReplicas();
-      m.add(new Replica(dataTable, order1))
-              .add(new Replica(dataTable, order2))
-              .add(new Replica(dataTable, order3));
-      MultiReplicas exp = new MultiReplicas();
-      exp.add(new Replica(dataTable, order1))
-              .add(new Replica(dataTable, order2))
-              .add(new Replica(dataTable, order3));
-      MultiReplicas m1 = generateNewMultiReplica(m);
-      MultiReplicas m2 = generateNewMultiReplica(m);
-      assertEquals(exp, m);
-      assertNotEquals(exp, m1);
-      assertNotEquals(exp, m2);
-    }
-  }
-
-  @Test
-  public void testOptimal() throws IOException {
+  public void testOptimal() throws IOException, NoSuchAlgorithmException {
     DataTable dataTable = generateDataTable();
     Query[] queries = new QueryGenerator(1000, dataTable).getQueries();
 

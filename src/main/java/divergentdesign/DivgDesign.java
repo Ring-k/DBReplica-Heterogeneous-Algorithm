@@ -16,141 +16,182 @@ import java.util.*;
 
 
 /**
- * the experiment found out that evaluate cost is higher in SA, because SA used here replica num = 1
+ * This class implement divergent design algorithm. When suing it, create an instance of
+ * the class, and all optimal() method. That method returns optimal solutions (multiple replicas),
+ * and current optimalCost and workloadSubsets is consistent with the optimal strategy.
+ * Experiments shows that evaluate cost is higher in SA, because we set replica num = 1 in SA here.
  */
 public class DivgDesign {
 
+  // input workload and data table
+  private Query[] workload;
+  private DataTable data;
+
+  // constant variable in divergent design algorithm
   private int replicaNum = Constant.REPLICA_NUMBER;
   private int loadBalanceFactor = Constant.LOAD_BALANCE_FACTOR;
   private int maxIteration = Constant.MAX_ITERATION;
   private double epsilone = Constant.EPSILONE;
 
-
-  private Query[] workload;
-  private DataTable data;
+  // subset of workload, group queries
   private List<Query>[] workloadSubsets;
 
-  private double totalCost;
-
-  private Random random = SecureRandom.getInstanceStrong();
+  // record optimal cost of design
+  private double optimalCost;
 
   /**
    * Constructor
    *
-   * @param data
-   * @param queries
-   * @param replicaNum
-   * @param loadBalanceFactor
-   * @param maxIteration
-   * @param epsilone
-   * @throws NoSuchAlgorithmException
+   * @param data,              input data table
+   * @param queries,           input queries, the workload
+   * @param replicaNum,        input replica number
+   * @param loadBalanceFactor, input load balance factor
+   * @param maxIteration,      input iteration threshold
+   * @param epsilon,           input epsilon threshold
    */
   public DivgDesign(DataTable data, Query[] queries,
-                    int replicaNum, int loadBalanceFactor, int maxIteration, double epsilone)
-          throws NoSuchAlgorithmException {
+                    int replicaNum, int loadBalanceFactor, int maxIteration, double epsilon) {
     this.data = new DataTable(data);
     this.replicaNum = replicaNum;
     this.loadBalanceFactor = loadBalanceFactor;
     this.maxIteration = maxIteration;
-    this.epsilone = epsilone;
+    this.epsilone = epsilon;
     this.workload = new Query[queries.length];
     System.arraycopy(queries, 0, workload, 0, workload.length);
     workloadSubsets = new List[replicaNum];
-    for(int i = 0; i < workloadSubsets.length; i++) workloadSubsets[i] = new ArrayList<>();
+    for (int i = 0; i < workloadSubsets.length; i++)
+      workloadSubsets[i] = new ArrayList<>();
   }
 
   /**
-   * Constructor
+   * Another constructor
    *
-   * @param dataTable
-   * @param queries
-   * @throws NoSuchAlgorithmException
+   * @param dataTable, input data table
+   * @param queries,   input queries
    */
-  public DivgDesign(DataTable dataTable, Query[] queries) throws NoSuchAlgorithmException {
+  public DivgDesign(DataTable dataTable, Query[] queries) {
     this.data = new DataTable(dataTable);
     this.workload = new Query[queries.length];
     System.arraycopy(queries, 0, workload, 0, workload.length);
     workloadSubsets = new List[replicaNum];
-    for(int i = 0; i < workloadSubsets.length; i++) workloadSubsets[i] = new ArrayList<>();
+    for (int i = 0; i < workloadSubsets.length; i++)
+      workloadSubsets[i] = new ArrayList<>();
   }
 
 
-  /**
-   * get optimal multi replicas
-   *
+  /*
+   * get optimal multiple replicas.
+   * 1. pick a random m-balanced design
+   * 2. ----> start iteration
+   * 3. |   get multi replica according to current design
+   * 4. |   calculate total cost of current replica
+   * 5. |   check if iteration ends, if ends ------------
+   * 6. |   group queries again, generate new design    |
+   * 7. --  update global record,                       |
+   * 8. update global record <---------------------------
+   * 9. return multiple replica
    * @return
    */
-  public MultiReplicas optimal() {
-    // pick a random m-balanced design
+  public MultiReplicas optimal() throws NoSuchAlgorithmException {
     initDesign();
     Replica[] multiReplicas = new Replica[replicaNum];
-
-    // prepare for the iteration
     int it = 0;
     double curCost;
-    // begin iteration
-    while (true) {
-      // 2. check replicas generated before
-      // get n configurations, and current total  cost
+    while (true) { // here begins the iteration
       for (int i = 0; i < replicaNum; i++)
-        multiReplicas[i] = recommandReplica(workloadSubsets[i]);
+        multiReplicas[i] = recommendReplica(workloadSubsets[i]);
       curCost = totalCost(multiReplicas);
-
       if (isIterationTerminate(it, curCost)) break;
-      // update
-      totalCost = curCost;
-      it++; // this is the point when an iteration ends
-
-      // 1. this is for next iteration
-      // init sub workload sets for this iteration
+      optimalCost = curCost;
+      it++;
       List<Query>[] curSubQueries = new List[replicaNum];
-      for(int i = 0; i < curSubQueries.length; i++) curSubQueries[i] = new ArrayList<>();
-      // for each queries in workload
-      for (int i = 0; i < workload.length; i++) {
-        int[] order = getLeastCostConfOrder(multiReplicas, workload[i]);
-        // add q to sub workload sets
-        for (int j = 0; j < loadBalanceFactor; j++)
-          curSubQueries[order[j]].add(new Query(workload[i]).setWeight(workload[i].getWeight() / loadBalanceFactor));
+      for (int i = 0; i < curSubQueries.length; i++)
+        curSubQueries[i] = new ArrayList<>();
+      // add queries to cost least groups
+      for (Query query : workload) {
+        int[] order = getLeastCostConfOrder(multiReplicas, query);
+        for (int i = 0; i < loadBalanceFactor; i++)
+          curSubQueries[order[i]].add(new Query(query)
+                  .setWeight(query.getWeight() / loadBalanceFactor));
       }
       System.arraycopy(curSubQueries, 0, workloadSubsets, 0, replicaNum);
     }
-
-    totalCost = curCost;
+    optimalCost = curCost;
     MultiReplicas res = new MultiReplicas();
-    for (int i = 0; i < multiReplicas.length; i++) res.add(multiReplicas[i]);
+    for (Replica replica : multiReplicas)
+      res.add(replica);
     return res;
   }
 
 
-  public void initDesign() {// TODO private
+  /**
+   * Initialize subsets of workload. Traverse each query in workload, and put it randomly
+   * into different query groups.
+   */
+  private void initDesign() throws NoSuchAlgorithmException {
+    Random random = SecureRandom.getInstanceStrong();
     for (Query q : workload)
       for (int j = 0; j < loadBalanceFactor; j++)
-        workloadSubsets[this.random.nextInt(workloadSubsets.length)]
+        workloadSubsets[random.nextInt(workloadSubsets.length)]
                 .add(new Query(q).setWeight(q.getWeight() / loadBalanceFactor));
   }
 
-   public Replica recommandReplica(List<Query> queries) { // TODO private
-    return (Replica) new StimutaleAnneal(data, queries.toArray(new Query[0]), 1).optimal().getReplicas().keySet().toArray()[0];
+  /**
+   * This method takes a collection of queries as input, considering data table  and
+   * return a replica configuration. The implementation depend on other modules or
+   * tools. Here we use stimulate anneal algorithm and set replica num to 1.
+   *
+   * @param queries, a collection of queries
+   * @return a recommended replica
+   */
+  private Replica recommendReplica(List<Query> queries) throws NoSuchAlgorithmException {
+    return (Replica) new StimutaleAnneal(data, queries.toArray(new Query[0]), 1)
+            .optimal().getReplicas().keySet().toArray()[0];
   }
 
-  public boolean isIterationTerminate(int curIteration, double curCost) {// TODO
-    if (totalCost == 0 || curIteration == 0) return false;
-    if (Math.abs(curCost - totalCost) < epsilone) return true;
+  /**
+   * Check if iteration should terminate. If current iteration reaches its threshold
+   * or improvement of current strategy too subtle (current cost - old cost < epsilon),
+   * terminate the iteration.
+   *
+   * @param curIteration, current iteration number
+   * @param curCost,      current cost
+   * @return false if terminate
+   */
+  private boolean isIterationTerminate(int curIteration, double curCost) {
+    if (optimalCost == 0 || curIteration == 0) return false;
+    if (Math.abs(curCost - optimalCost) < epsilone) return true;
     return curIteration >= maxIteration;
   }
 
-  public int[] getLeastCostConfOrder(Replica[] replicas, Query query) {// TODO private
+  /**
+   * Input a group of replicas, calculate cost of evaluating given query on each replica,
+   * and output the m-cost-least order of replicas. The length of the output equals to
+   * load balancing factor.
+   *
+   * @param replicas, the candidate replicas
+   * @param query,    the query need to evaluate
+   * @return order of m-cost-least replicas
+   */
+  private int[] getLeastCostConfOrder(Replica[] replicas, Query query) {
     Integer[] order = new Integer[replicaNum];
     for (int i = 0; i < order.length; i++) order[i] = i;
     BigDecimal[] costs = new BigDecimal[replicaNum];
-    for (int i = 0; i < costs.length; i++) costs[i] = CostModel.cost(replicas[i], query);
+    for (int i = 0; i < costs.length; i++)
+      costs[i] = CostModel.cost(replicas[i], query);
     Arrays.sort(order, Comparator.comparing(o -> costs[o]));
     int[] res = new int[loadBalanceFactor];
     for (int i = 0; i < res.length; i++) res[i] = order[i];
     return res;
   }
 
-  public double totalCost(Replica[] mulReplicas) {// TODO private
+  /**
+   * The total cost of a design, according to formula in paper
+   *
+   * @param mulReplicas, a collection of replicas
+   * @return total cost
+   */
+  private double totalCost(Replica[] mulReplicas) {
     BigDecimal ans = new BigDecimal("0");
     for (Query query : workload) {
       BigDecimal curCost = new BigDecimal("0");
