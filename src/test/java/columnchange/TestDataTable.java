@@ -1,7 +1,7 @@
 package columnchange;
 
-import columnchange.datamodel.DataTable;
-import columnchange.datamodel.Histogram;
+import datamodel.DataTable;
+import datamodel.Histogram;
 import org.junit.Test;
 
 import java.util.ArrayList;

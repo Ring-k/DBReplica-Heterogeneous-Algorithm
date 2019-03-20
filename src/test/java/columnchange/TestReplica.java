@@ -1,9 +1,9 @@
 package columnchange;
 
-import columnchange.datamodel.DataTable;
-import columnchange.datamodel.Histogram;
-import columnchange.query.Query;
-import columnchange.replica.Replica;
+import datamodel.DataTable;
+import datamodel.Histogram;
+import query.Query;
+import replica.Replica;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

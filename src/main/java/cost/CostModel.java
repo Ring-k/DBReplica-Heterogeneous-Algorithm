@@ -1,8 +1,8 @@
-package columnchange.algorithm;
+package cost;
 
-import columnchange.query.Query;
-import columnchange.replica.MultiReplicas;
-import columnchange.replica.Replica;
+import query.Query;
+import replica.MultiReplicas;
+import replica.Replica;
 import constant.Constant;
 
 import java.math.BigDecimal;
@@ -34,6 +34,14 @@ public class CostModel {
     BigDecimal ans = new BigDecimal("0");
     for(Query q : queries)
       ans = ans.add(cost(multiReplicas, q));
+    return ans;
+  }
+
+  // TODO consiter cost
+  public static BigDecimal cost(Replica[] multiReplicas, Query query){
+    BigDecimal ans = new BigDecimal("0");
+    for(Replica r : multiReplicas)
+      ans = ans.add(cost(r, query));
     return ans;
   }
 

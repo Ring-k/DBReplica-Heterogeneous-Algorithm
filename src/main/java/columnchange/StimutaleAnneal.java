@@ -1,9 +1,10 @@
-package columnchange.algorithm;
+package columnchange;
 
-import columnchange.datamodel.DataTable;
-import columnchange.query.Query;
-import columnchange.replica.MultiReplicas;
-import columnchange.replica.Replica;
+import cost.CostModel;
+import datamodel.DataTable;
+import query.Query;
+import replica.MultiReplicas;
+import replica.Replica;
 import constant.Constant;
 
 import java.io.File;
@@ -26,6 +27,8 @@ public class StimutaleAnneal {
   // the queries
   private static Query[] queries;
 
+  private static int replicaNumber;
+
   // the solution
   private static MultiReplicas multiReplicas;
 
@@ -40,12 +43,19 @@ public class StimutaleAnneal {
 
 
   public StimutaleAnneal(DataTable datatable, Query[] queries) {
-    StimutaleAnneal.data = datatable;
-    StimutaleAnneal.queries = queries;
+    this.data = datatable;
+    this.queries = queries;
+    this.replicaNumber = Constant.REPLICA_NUMBER;
+  }
+
+  public StimutaleAnneal(DataTable dataTable, Query[] queries, int replicaNumber){
+    this.data = dataTable;
+    this.queries = queries;
+    this.replicaNumber = replicaNumber;
   }
 
 
-  public static MultiReplicas optimal() {
+  public MultiReplicas optimal() {
     // set original temperature
     initTemperature();
     // initialize original(random) solution
@@ -191,7 +201,7 @@ public class StimutaleAnneal {
 
   private static MultiReplicas initSolution() {
     MultiReplicas multiReplicas = new MultiReplicas();
-    for (int i = 0; i < Constant.REPLICA_NUMBER; i++)
+    for (int i = 0; i < replicaNumber; i++)
       multiReplicas.add(new Replica(data, ArrayTransform.random(data.getColNum())));
     return multiReplicas;
   }
@@ -213,7 +223,7 @@ public class StimutaleAnneal {
     return ans;
   }
 
-  public static double getCost(){
+  public double getOptimalCost(){
     return optimalCost.doubleValue();
   }
 

@@ -1,7 +1,7 @@
-package columnchange.replica;
+package replica;
 
-import columnchange.datamodel.DataTable;
-import columnchange.query.Query;
+import datamodel.DataTable;
+import query.Query;
 
 import java.math.BigDecimal;
 import java.util.Arrays;

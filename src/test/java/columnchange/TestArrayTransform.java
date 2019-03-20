@@ -1,9 +1,8 @@
 package columnchange;
 
-import columnchange.algorithm.ArrayTransform;
 import org.junit.Test;
 
-import static columnchange.algorithm.ArrayTransform.*;
+import static columnchange.ArrayTransform.*;
 import static org.junit.Assert.*;
 
 import java.util.Arrays;

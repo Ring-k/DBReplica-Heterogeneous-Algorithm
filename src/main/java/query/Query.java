@@ -1,4 +1,4 @@
-package columnchange.query;
+package query;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -11,27 +11,38 @@ public class Query implements Serializable {
   private double[] pointVals;// size = colNum, rangeColIndex is taken by some nonsense value
   private double weight;
 
-  public Query(int rangeColIndex, double lowerBound, double upperBound, double[] pointVals, double weight){
+  public Query(int rangeColIndex, double lowerBound, double upperBound, double[] pointVals, double weight) {
     this.rangeColIndex = rangeColIndex;
     this.lowerBound = lowerBound;
     this.upperBound = upperBound;
-    this.pointVals = pointVals;
     this.colNum = pointVals.length;
+    this.pointVals = new double[colNum];
+    System.arraycopy(pointVals, 0, this.pointVals, 0, colNum);
     this.weight = weight;
   }
 
-  public Query getQuery(int[] order){
-    if(order.length != colNum) throw new IllegalArgumentException();
+  public Query(Query q) {
+    this.rangeColIndex = q.rangeColIndex;
+    this.lowerBound = q.lowerBound;
+    this.upperBound = q.upperBound;
+    this.colNum = q.colNum;
+    this.pointVals = new double[colNum];
+    System.arraycopy(q.pointVals, 0, this.pointVals, 0, colNum);
+    this.weight = q.weight;
+  }
+
+  public Query getQuery(int[] order) {
+    if (order.length != colNum) throw new IllegalArgumentException();
     int newRangeColIdx = -1;
-    for(int i = 0; i < order.length; i++) {
+    for (int i = 0; i < order.length; i++) {
       if (order[i] == rangeColIndex) {
         newRangeColIdx = i;
         break;
       }
     }
-    if(newRangeColIdx == -1) throw new IllegalArgumentException();
+    if (newRangeColIdx == -1) throw new IllegalArgumentException();
     double[] newPointVals = new double[order.length];
-    for(int i = 0; i < newPointVals.length; i++) newPointVals[i] = pointVals[order[i]];
+    for (int i = 0; i < newPointVals.length; i++) newPointVals[i] = pointVals[order[i]];
     return new Query(newRangeColIdx, lowerBound, upperBound, newPointVals, weight);
   }
 
@@ -91,7 +102,8 @@ public class Query implements Serializable {
     this.pointVals = pointVals;
   }
 
-  public void setWeight(double weight) {
+  public Query setWeight(double weight) {
     this.weight = weight;
+    return this;
   }
 }

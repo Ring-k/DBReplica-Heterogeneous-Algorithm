@@ -1,15 +1,14 @@
 package columnchange;
 
-import columnchange.algorithm.CostModel;
-import columnchange.algorithm.StimutaleAnneal;
-import columnchange.datamodel.DataTable;
-import columnchange.query.Query;
-import columnchange.query.QueryGenerator;
-import columnchange.replica.MultiReplicas;
-import columnchange.replica.Replica;
+import cost.CostModel;
+import datamodel.DataTable;
+import query.Query;
+import query.QueryGenerator;
+import replica.MultiReplicas;
+import replica.Replica;
 
-import static columnchange.algorithm.StimutaleAnneal.generateNewMultiReplica;
-import static org.junit.Assert.*;
+import static columnchange.StimutaleAnneal.generateNewMultiReplica;
+
 import org.junit.Test;
 
 import java.io.*;
@@ -17,7 +16,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 
 import static columnchange.TestDataTable.generateDataTable;
-import static columnchange.algorithm.StimutaleAnneal.generateNewReplica;
+import static columnchange.StimutaleAnneal.generateNewReplica;
 
 public class TestStimulateAnneal {
 
@@ -73,7 +72,7 @@ public class TestStimulateAnneal {
     StimutaleAnneal sa = new StimutaleAnneal(dataTable, queries);
     MultiReplicas m = sa.optimal();
     System.out.println("Solution: " + m.toString());
-    System.out.println("Least Cost: " + sa.getCost());
+    System.out.println("Least Cost: " + sa.getOptimalCost());
     System.out.println(Arrays.toString(sa.getHistory().toArray()));
 
 

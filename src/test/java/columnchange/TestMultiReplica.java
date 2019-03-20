@@ -1,8 +1,8 @@
 package columnchange;
 
-import columnchange.datamodel.DataTable;
-import columnchange.replica.MultiReplicas;
-import columnchange.replica.Replica;
+import datamodel.DataTable;
+import replica.MultiReplicas;
+import replica.Replica;
 import org.junit.Test;
 
 import java.util.HashMap;

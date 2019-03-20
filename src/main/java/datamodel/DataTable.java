@@ -1,8 +1,7 @@
-package columnchange.datamodel;
+package datamodel;
 
 import constant.Constant;
 
-import javax.xml.crypto.Data;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Objects;

@@ -1,8 +1,8 @@
 package columnchange;
 
-import columnchange.datamodel.DataTable;
-import columnchange.query.Query;
-import columnchange.query.QueryGenerator;
+import datamodel.DataTable;
+import query.Query;
+import query.QueryGenerator;
 import org.junit.Test;
 
 import static columnchange.TestDataTable.generateDataTable;

@@ -1,11 +1,10 @@
 package columnchange;
 
-import columnchange.algorithm.CostModel;
-import columnchange.algorithm.StimutaleAnneal;
-import columnchange.datamodel.DataTable;
-import columnchange.query.Query;
-import columnchange.replica.MultiReplicas;
-import columnchange.replica.Replica;
+import cost.CostModel;
+import datamodel.DataTable;
+import query.Query;
+import replica.MultiReplicas;
+import replica.Replica;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

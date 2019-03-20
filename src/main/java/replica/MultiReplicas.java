@@ -1,4 +1,4 @@
-package columnchange.replica;
+package replica;
 
 import java.util.*;
 

@@ -1,6 +1,6 @@
 package columnchange;
 
-import columnchange.datamodel.Histogram;
+import datamodel.Histogram;
 
 import java.util.ArrayList;
 import java.util.Arrays;

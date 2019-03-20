@@ -1,6 +1,6 @@
-package columnchange.query;
+package query;
 
-import columnchange.datamodel.DataTable;
+import datamodel.DataTable;
 
 import java.util.Random;
 

@@ -1,4 +1,4 @@
-package columnchange.datamodel;
+package datamodel;
 
 import constant.Constant;
 

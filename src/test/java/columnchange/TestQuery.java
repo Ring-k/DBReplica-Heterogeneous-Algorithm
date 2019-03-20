@@ -1,9 +1,7 @@
 package columnchange;
 
-import columnchange.query.Query;
+import query.Query;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public class TestQuery {
 
