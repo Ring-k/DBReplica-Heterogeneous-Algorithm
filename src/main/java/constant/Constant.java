@@ -4,15 +4,16 @@ import java.math.BigDecimal;
 
 public class Constant {
 
-  // histogram constant
+  // Histogram
   public static final double histogramStep = 1;
 
-  // data table constant
+  // DataTable
   public static final BigDecimal ROW_NUM = new BigDecimal("1000000");
 
+  // Objective System
   public static final int REPLICA_NUMBER = 3;
 
-  // cost
+  // CostModel
   public static final BigDecimal COST_SCALE = BigDecimal.valueOf(1);
 
   // Stimulate Anneal
@@ -24,7 +25,7 @@ public class Constant {
   // Divergent Design
   public static final int LOAD_BALANCE_FACTOR = 2;
   public static final int MAX_ITERATION = 1000;
-  public static final double EPSILONE = 0.001;
+  public static final double EPSILON = 0.001;
 
 
 }

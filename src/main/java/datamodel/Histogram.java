@@ -7,24 +7,29 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * This class record histograms info of a column.
+ */
 public class Histogram implements Serializable {
 
-  private double maxX, minX, intervalLength;
+  private double maxX;
+  private double minX;
+  private double intervalLength;
   private double[] xCoordinate;
   private int[] yCoordinate;
   private double[] probability;
   private int pointsNum;
   private double step = Constant.histogramStep;
 
+  /**
+   * Constructor
+   * @param data, a list of column data, all data in a column
+   * @param groupNum, the number of ranges need to do statistic work, number of ranges
+   */
   public Histogram(List<Double> data, int groupNum) {
-    // init max and min
     initMaxAndMin(data);
-
-    //init the interval length
     intervalLength = (maxX - minX) / groupNum;
     pointsNum = data.size();
-
-    // init the statistics arrays
     xCoordinate = new double[groupNum];
     yCoordinate = new int[groupNum];
     probability = new double[groupNum];
@@ -35,6 +40,11 @@ public class Histogram implements Serializable {
       probability[i] = (double) yCoordinate[i] / pointsNum;
   }
 
+  /**
+   * Initialize max and min value of the histogram. Traverse all data in the list, get the maximum and minimum
+   * value of it.
+   * @param data, a list of data
+   */
   private void initMaxAndMin(List<Double> data) {
     maxX = data.get(0);
     minX = data.get(0);
@@ -45,10 +55,12 @@ public class Histogram implements Serializable {
     maxX = maxX + 1;
   }
 
-  private boolean isIn(double val, double lowerBound, double upperBound) {
-    return val >= lowerBound && val < upperBound;
-  }
 
+  /**
+   * Given a data, get the start value of the range where the data is in.
+   * @param val, the value of data
+   * @return the start value of the range, -1 if not found
+   */
   private int getStartIndex(double val) {
     if (val > maxX - 1) return -1;
     if (val < minX) return -1;
@@ -57,6 +69,13 @@ public class Histogram implements Serializable {
     return -1;
   }
 
+  /**
+   * Evaluate the probability of getting a point data in the column, according to column histogram.
+   * Assume value in range [x[i], x[i+1]) obeys mean value distribution, and the range  [x[i], x[i+1])
+   * is divided by tiny step. Assume the probability of getting data point equals to accessing the step.
+   * @param val, value of data
+   * @return probability of getting the data
+   */
   public double getProbability(double val) {
     int index = getStartIndex(val);
     if (index == -1) return 0;
@@ -64,33 +83,39 @@ public class Histogram implements Serializable {
   }
 
 
+  /**
+   * Evaluate the probability of assessing a range of data. First calculate the probability at two
+   * ends, from lower bound of the range to nearest greater spitting point, from lower bound of the range
+   * to nearest less point.The calculate the probability from two splitting points.
+   * @param lowerBound, lower bound of the range
+   * @param upperBound, upper bound of the range
+   * @return the probability
+   */
   public double getProbability(double lowerBound, double upperBound) {
     if (lowerBound > upperBound) throw new IllegalArgumentException();
-    // point query
     if (lowerBound == upperBound) return getProbability(lowerBound);
-    // lower bound greater than max, or upper bound less than min
     if (lowerBound >= maxX + intervalLength || upperBound < minX) return 0;
-
-    int lowerIndex = getStartIndex(lowerBound), upperIndex = getStartIndex(upperBound);
-    // lower bound < min
+    int lowerIndex = getStartIndex(lowerBound);
+    int upperIndex = getStartIndex(upperBound);
     if (lowerIndex == -1) {
       lowerIndex = 0;
       lowerBound = minX;
     }
-    // upper bound > max
     if (upperIndex == -1) {
       upperIndex = xCoordinate.length - 1;
       upperBound = maxX;
     }
-    if (lowerIndex == upperIndex) return (upperBound - lowerBound) / intervalLength * probability[lowerIndex];
+    if (lowerIndex == upperIndex)
+      return (upperBound - lowerBound) / intervalLength * probability[lowerIndex];
     double result = 0.0;
-    result += ((xCoordinate[lowerIndex + 1] - lowerBound) / intervalLength * probability[lowerIndex]);
-    result += ((upperBound - xCoordinate[upperIndex]) / intervalLength * probability[upperIndex]);
+    result += ((xCoordinate[lowerIndex + 1] - lowerBound)
+            / intervalLength * probability[lowerIndex]);
+    result += ((upperBound - xCoordinate[upperIndex])
+            / intervalLength * probability[upperIndex]);
     for (int i = lowerIndex + 1; i < upperIndex; i++)
       result += probability[i];
     return result;
   }
-
 
   public double getMinX() {
     return minX;
@@ -98,18 +123,6 @@ public class Histogram implements Serializable {
 
   public double getMaxX() {
     return maxX;
-  }
-
-  public double[] getProbability() {
-    return probability;
-  }
-
-  public double[] getxCoordinate() {
-    return xCoordinate;
-  }
-
-  public int[] getyCoordinate() {
-    return yCoordinate;
   }
 
   @Override
@@ -144,17 +157,5 @@ public class Histogram implements Serializable {
     result = 31 * result + Arrays.hashCode(yCoordinate);
     result = 31 * result + Arrays.hashCode(probability);
     return result;
-  }
-
-  public double getIntervalLength() {
-    return intervalLength;
-  }
-
-  public int getPointsNum() {
-    return pointsNum;
-  }
-
-  public double getStep() {
-    return step;
   }
 }

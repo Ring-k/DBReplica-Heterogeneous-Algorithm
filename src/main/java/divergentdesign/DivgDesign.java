@@ -31,7 +31,7 @@ public class DivgDesign {
   private int replicaNum = Constant.REPLICA_NUMBER;
   private int loadBalanceFactor = Constant.LOAD_BALANCE_FACTOR;
   private int maxIteration = Constant.MAX_ITERATION;
-  private double epsilone = Constant.EPSILONE;
+  private double epsilone = Constant.EPSILON;
 
   // subset of workload, group queries
   private List<Query>[] workloadSubsets;
@@ -40,7 +40,8 @@ public class DivgDesign {
   private double optimalCost;
 
   /**
-   * Constructor
+   * Constructor, using customized input variables, replica number, load balancing factor, iteration
+   * threshold, epsilon threshold.
    *
    * @param data,              input data table
    * @param queries,           input queries, the workload
@@ -64,7 +65,7 @@ public class DivgDesign {
   }
 
   /**
-   * Another constructor
+   * Constructor, using default constant variables in Constant class.
    *
    * @param dataTable, input data table
    * @param queries,   input queries

@@ -3,15 +3,37 @@ package query;
 import java.io.Serializable;
 import java.util.Arrays;
 
+/**
+ * This class represent a query in the workload. A Query consists of a range query and a
+ * group of point value queries. It has 6 attributes in total. Attribute rangeColIndex is
+ * the index of column there the range query works on. Attribute colNum is the number of
+ * columns this query works on, including point query and  * range query, which normally
+ * equals to the column number of data table. Attribute lowerBound and upperBound is the
+ * lower bound value and upper bound value of range query. The array, pointVals, records
+ * point query values on each column, and the column which will range query working on
+ * is also included, but the value is initialized as 0. The order of values in the array
+ * is consistent with the column order of original data table. So the total length of the
+ * array equals to colNum. Attribute weight indicates the weight of the query.
+ */
 public class Query implements Serializable {
-
   private int rangeColIndex;
   private int colNum;
-  private double upperBound, lowerBound;
-  private double[] pointVals;// size = colNum, rangeColIndex is taken by some nonsense value
+  private double lowerBound;
+  private double upperBound;
+  private double[] pointVals;
   private double weight;
 
-  public Query(int rangeColIndex, double lowerBound, double upperBound, double[] pointVals, double weight) {
+  /**
+   * Constructor
+   *
+   * @param rangeColIndex, input column index where range query works on
+   * @param lowerBound,    lower bound of the range query
+   * @param upperBound,    upper bound of the range query
+   * @param pointVals,     values of point queries
+   * @param weight,        weight of this query
+   */
+  public Query(int rangeColIndex, double lowerBound, double upperBound,
+               double[] pointVals, double weight) {
     this.rangeColIndex = rangeColIndex;
     this.lowerBound = lowerBound;
     this.upperBound = upperBound;
@@ -21,6 +43,10 @@ public class Query implements Serializable {
     this.weight = weight;
   }
 
+  /**
+   * Copy constructor, deep copy
+   * @param q, another query
+   */
   public Query(Query q) {
     this.rangeColIndex = q.rangeColIndex;
     this.lowerBound = q.lowerBound;
@@ -31,6 +57,11 @@ public class Query implements Serializable {
     this.weight = q.weight;
   }
 
+  /**
+   * Transform a query, according to given column order.
+   * @param order, the order of columns (in a replica)
+   * @return
+   */
   public Query getQuery(int[] order) {
     if (order.length != colNum) throw new IllegalArgumentException();
     int newRangeColIdx = -1;
@@ -80,26 +111,6 @@ public class Query implements Serializable {
 
   public double getWeight() {
     return weight;
-  }
-
-  public void setRangeColIndex(int rangeColIndex) {
-    this.rangeColIndex = rangeColIndex;
-  }
-
-  public void setColNum(int colNum) {
-    this.colNum = colNum;
-  }
-
-  public void setUpperBound(double upperBound) {
-    this.upperBound = upperBound;
-  }
-
-  public void setLowerBound(double lowerBound) {
-    this.lowerBound = lowerBound;
-  }
-
-  public void setPointVals(double[] pointVals) {
-    this.pointVals = pointVals;
   }
 
   public Query setWeight(double weight) {
