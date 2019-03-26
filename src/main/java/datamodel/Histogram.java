@@ -3,7 +3,6 @@ package datamodel;
 import constant.Constant;
 
 import java.io.Serializable;
-import java.security.acl.Group;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -40,9 +39,8 @@ public class Histogram implements Serializable {
     for (int i = 0; i < xCoordinate.length; i++)
       xCoordinate[i] = minX + i * intervalLength;
     for (double i : data)
-        yCoordinate[getStartIndex(i)]++;
-    for (int i = 0; i < probability.length; i++)
-      probability[i] = (double) yCoordinate[i] / pointsNum;
+      yCoordinate[getStartIndex(i)]++;
+    updateProbability();
   }
 
   /**
@@ -50,22 +48,26 @@ public class Histogram implements Serializable {
    *
    * @param groupNum
    */
-  public Histogram(int groupNum){
-    minX = 0;
-    maxX = 0;
-    intervalLength = 0;
+  public Histogram(double min, double max, int groupNum) {
+    minX = min;
+    maxX = max + 1;
+    intervalLength = (maxX - minX) / groupNum;
     pointsNum = 0;
     xCoordinate = new double[groupNum];
     yCoordinate = new int[groupNum];
     probability = new double[groupNum];
+    for (int i = 0; i < xCoordinate.length; i++)
+      xCoordinate[i] = minX + i * intervalLength;
     this.groupNumber = groupNum;
   }
 
-  public void add(double val){
-    if(val < minX) minX = val;
-    else if(val > maxX) maxX = val;
-    intervalLength = (maxX - minX) / groupNumber;
+  public void add(double val) {
+    yCoordinate[getStartIndex(val)]++;
+  }
 
+  public void updateProbability(){
+    for (int i = 0; i < probability.length; i++)
+      probability[i] = (double) yCoordinate[i] / pointsNum;
   }
 
 
@@ -159,10 +161,10 @@ public class Histogram implements Serializable {
   }
 
   // not allowed to use
-  public void setPointsNum(int n){
+  public void setPointsNum(int n) {
     int c = n / pointsNum;
     this.pointsNum = n;
-    for(int i = 0; i < yCoordinate.length; i++)
+    for (int i = 0; i < yCoordinate.length; i++)
       yCoordinate[i] *= c;
   }
 
