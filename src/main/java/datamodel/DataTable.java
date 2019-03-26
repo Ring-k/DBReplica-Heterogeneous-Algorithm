@@ -96,4 +96,11 @@ public class DataTable implements Serializable {
   public Histogram[] getColHistograms() {
     return colHistograms;
   }
+
+//  public void setRowNum(BigDecimal rowNum) {
+//    this.rowNum = rowNum;
+//    for(int i = 0; i < colHistograms.length; i++){
+//      colHistograms[i].setPointsNum(rowNum);
+//    }
+//  }
 }

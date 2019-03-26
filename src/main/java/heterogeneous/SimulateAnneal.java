@@ -1,4 +1,4 @@
-package columnchange;
+package heterogeneous;
 
 import cost.CostModel;
 import datamodel.DataTable;
@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Random;
 
 
-public class StimutaleAnneal {
+public class SimulateAnneal {
 
   private DataTable data;
   private Query[] queries;
@@ -32,8 +32,7 @@ public class StimutaleAnneal {
   // the solution
   private MultiReplicas multiReplicas;
   private BigDecimal optimalCost;
-  private List<BigDecimal> costHistory = new ArrayList<>();
-
+  private List<Double> costHistory = new ArrayList<>();
 
   /**
    * Constructor
@@ -41,7 +40,7 @@ public class StimutaleAnneal {
    * @param dataTable, info of the data table
    * @param queries,   workload
    */
-  public StimutaleAnneal(DataTable dataTable, Query[] queries) {
+  public SimulateAnneal(DataTable dataTable, Query[] queries) {
     this.data = dataTable;
     this.queries = queries;
     this.replicaNumber = Constant.REPLICA_NUMBER;
@@ -54,7 +53,7 @@ public class StimutaleAnneal {
    * @param queries,       workload
    * @param replicaNumber, number of replica
    */
-  public StimutaleAnneal(DataTable dataTable, Query[] queries, int replicaNumber) {
+  public SimulateAnneal(DataTable dataTable, Query[] queries, int replicaNumber) {
     this.data = dataTable;
     this.queries = queries;
     this.replicaNumber = replicaNumber;
@@ -86,9 +85,9 @@ public class StimutaleAnneal {
     initTemperature();
     multiReplicas = initSolution();
     optimalCost = CostModel.cost(multiReplicas, queries);
-    costHistory.add(optimalCost);
+    costHistory.add(optimalCost.doubleValue());
     while (!isGlobalConverge()) {
-      System.out.println(">>>>>>>t: " + temperature);
+//      System.out.println(">>>>>>>t: " + temperature);
       MultiReplicas curMultiReplica = new MultiReplicas(multiReplicas);
       BigDecimal curCost = optimalCost;
       while (!isLocalConverge()) {
@@ -98,15 +97,15 @@ public class StimutaleAnneal {
         if (isChosen(newCost, curCost)) {
           curMultiReplica = newMultiReplica;
           curCost = newCost;
-          costHistory.add(curCost);
-          System.out.println("iteration" + iteration + ": "
-                  + curCost.setScale(2, BigDecimal.ROUND_HALF_UP)
-                  + ", " + curMultiReplica.getOrderString());
+//          System.out.println("iteration" + iteration + ": "
+//                  + curCost.setScale(2, BigDecimal.ROUND_HALF_UP)
+//                  + ", " + curMultiReplica.getOrderString());
         } else {
-          System.out.println("iteration" + iteration + ": "
-                  + newCost.setScale(2, BigDecimal.ROUND_HALF_UP)
-                  + ", " + newMultiReplica.getOrderString() + " drop");
+//          System.out.println("iteration" + iteration + ": "
+//                  + newCost.setScale(2, BigDecimal.ROUND_HALF_UP)
+//                  + ", " + newMultiReplica.getOrderString() + " drop");
         }
+        costHistory.add(curCost.doubleValue());
         iteration++;
       }
       iteration = 0;
@@ -118,11 +117,6 @@ public class StimutaleAnneal {
         optimalCnt++;
       }
       decreaseTemperature();
-    }
-    try {
-      writeHistory();
-    } catch (IOException e) {
-      e.printStackTrace();
     }
     return multiReplicas;
   }
@@ -215,7 +209,7 @@ public class StimutaleAnneal {
    * @return true if converges
    */
   private boolean isGlobalConverge() {
-    return optimalCnt == 100;
+    return optimalCnt == Constant.OPTIMAL_COUNT_THRESHOLD;
   }
 
   /**
@@ -289,23 +283,8 @@ public class StimutaleAnneal {
    *
    * @return the record history
    */
-  public List<BigDecimal> getHistory() {
+  public List<Double> getHistory() {
     return costHistory;
   }
-
-  /**
-   * Write the record history of optimal cost in a file for analytic work.
-   */
-  private void writeHistory() throws IOException {
-    File file = new File(Constant.HISTORY_STORE_PATH);
-    if (file.exists()) file.delete();
-    file.createNewFile();
-    PrintWriter pw = new PrintWriter(file);
-    for (BigDecimal c : costHistory)
-      pw.println(c);
-    pw.flush();
-    pw.close();
-  }
-
 
 }

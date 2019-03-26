@@ -1,4 +1,4 @@
-package columnchange;
+package heterogeneous;
 
 import java.util.ArrayList;
 import java.util.Arrays;

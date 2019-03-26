@@ -3,6 +3,7 @@ package datamodel;
 import constant.Constant;
 
 import java.io.Serializable;
+import java.security.acl.Group;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -20,10 +21,12 @@ public class Histogram implements Serializable {
   private double[] probability;
   private int pointsNum;
   private double step = Constant.histogramStep;
+  private int groupNumber;
 
   /**
    * Constructor
-   * @param data, a list of column data, all data in a column
+   *
+   * @param data,     a list of column data, all data in a column
    * @param groupNum, the number of ranges need to do statistic work, number of ranges
    */
   public Histogram(List<Double> data, int groupNum) {
@@ -33,16 +36,43 @@ public class Histogram implements Serializable {
     xCoordinate = new double[groupNum];
     yCoordinate = new int[groupNum];
     probability = new double[groupNum];
+
     for (int i = 0; i < xCoordinate.length; i++)
       xCoordinate[i] = minX + i * intervalLength;
-    for (double i : data) yCoordinate[getStartIndex(i)]++;
+    for (double i : data)
+        yCoordinate[getStartIndex(i)]++;
     for (int i = 0; i < probability.length; i++)
       probability[i] = (double) yCoordinate[i] / pointsNum;
   }
 
   /**
+   * Constructor for adding items
+   *
+   * @param groupNum
+   */
+  public Histogram(int groupNum){
+    minX = 0;
+    maxX = 0;
+    intervalLength = 0;
+    pointsNum = 0;
+    xCoordinate = new double[groupNum];
+    yCoordinate = new int[groupNum];
+    probability = new double[groupNum];
+    this.groupNumber = groupNum;
+  }
+
+  public void add(double val){
+    if(val < minX) minX = val;
+    else if(val > maxX) maxX = val;
+    intervalLength = (maxX - minX) / groupNumber;
+
+  }
+
+
+  /**
    * Initialize max and min value of the histogram. Traverse all data in the list, get the maximum and minimum
    * value of it.
+   *
    * @param data, a list of data
    */
   private void initMaxAndMin(List<Double> data) {
@@ -58,6 +88,7 @@ public class Histogram implements Serializable {
 
   /**
    * Given a data, get the start value of the range where the data is in.
+   *
    * @param val, the value of data
    * @return the start value of the range, -1 if not found
    */
@@ -73,6 +104,7 @@ public class Histogram implements Serializable {
    * Evaluate the probability of getting a point data in the column, according to column histogram.
    * Assume value in range [x[i], x[i+1]) obeys mean value distribution, and the range  [x[i], x[i+1])
    * is divided by tiny step. Assume the probability of getting data point equals to accessing the step.
+   *
    * @param val, value of data
    * @return probability of getting the data
    */
@@ -87,6 +119,7 @@ public class Histogram implements Serializable {
    * Evaluate the probability of assessing a range of data. First calculate the probability at two
    * ends, from lower bound of the range to nearest greater spitting point, from lower bound of the range
    * to nearest less point.The calculate the probability from two splitting points.
+   *
    * @param lowerBound, lower bound of the range
    * @param upperBound, upper bound of the range
    * @return the probability
@@ -123,6 +156,14 @@ public class Histogram implements Serializable {
 
   public double getMaxX() {
     return maxX;
+  }
+
+  // not allowed to use
+  public void setPointsNum(int n){
+    int c = n / pointsNum;
+    this.pointsNum = n;
+    for(int i = 0; i < yCoordinate.length; i++)
+      yCoordinate[i] *= c;
   }
 
   @Override

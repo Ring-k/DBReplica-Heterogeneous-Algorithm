@@ -2,7 +2,7 @@ package divergentdesign;
 
 
 import cost.CostModel;
-import columnchange.StimutaleAnneal;
+import heterogeneous.SimulateAnneal;
 import constant.Constant;
 import datamodel.DataTable;
 import query.Query;
@@ -38,6 +38,7 @@ public class DivgDesign {
 
   // record optimal cost of design
   private double optimalCost;
+  private List<Double> history;
 
   /**
    * Constructor, using customized input variables, replica number, load balancing factor, iteration
@@ -62,6 +63,7 @@ public class DivgDesign {
     workloadSubsets = new List[replicaNum];
     for (int i = 0; i < workloadSubsets.length; i++)
       workloadSubsets[i] = new ArrayList<>();
+    this.history = new ArrayList<>();
   }
 
   /**
@@ -77,6 +79,7 @@ public class DivgDesign {
     workloadSubsets = new List[replicaNum];
     for (int i = 0; i < workloadSubsets.length; i++)
       workloadSubsets[i] = new ArrayList<>();
+    this.history = new ArrayList<>();
   }
 
 
@@ -104,6 +107,7 @@ public class DivgDesign {
       curCost = totalCost(multiReplicas);
       if (isIterationTerminate(it, curCost)) break;
       optimalCost = curCost;
+      history.add(optimalCost);
       it++;
       List<Query>[] curSubQueries = new List[replicaNum];
       for (int i = 0; i < curSubQueries.length; i++)
@@ -118,6 +122,7 @@ public class DivgDesign {
       System.arraycopy(curSubQueries, 0, workloadSubsets, 0, replicaNum);
     }
     optimalCost = curCost;
+    history.add(optimalCost);
     MultiReplicas res = new MultiReplicas();
     for (Replica replica : multiReplicas)
       res.add(replica);
@@ -146,7 +151,7 @@ public class DivgDesign {
    * @return a recommended replica
    */
   private Replica recommendReplica(List<Query> queries) throws NoSuchAlgorithmException {
-    return (Replica) new StimutaleAnneal(data, queries.toArray(new Query[0]), 1)
+    return (Replica) new SimulateAnneal(data, queries.toArray(new Query[0]), 1)
             .optimal().getReplicas().keySet().toArray()[0];
   }
 
@@ -205,5 +210,13 @@ public class DivgDesign {
       ans = ans.add(curCost);
     }
     return ans.doubleValue();
+  }
+
+  public double getOptimalCost() {
+    return optimalCost;
+  }
+
+  public List<Double> getHistory() {
+    return history;
   }
 }
