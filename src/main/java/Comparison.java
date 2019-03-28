@@ -19,16 +19,13 @@ public class Comparison {
 
   static void generateDataAndQueries(int min, int max) throws NoSuchAlgorithmException {
     for (int i = min; i <= max; i++) {
-      System.out.println("current task: "+i);
       int group = 100;
       int maxVal = 1000;
       int row = 10000;
       for (int j = 1; j <= i; j++) // row*((max/group/step)^n)
         row *= (maxVal / (group * Constant.histogramStep));
 
-      System.out.println("111111111111111");
       DataTable dataTable = generateDataTable(i, row, group, maxVal);
-      System.out.println("22222222222222222");
       Query[] queries = new QueryGenerator(1000, dataTable).getQueries();
       ObjectOutputStream oos = null;
       try {
@@ -48,15 +45,10 @@ public class Comparison {
   static DataTable generateDataTable(int colNum, int rowNum, int group, int maxVal) throws NoSuchAlgorithmException {
     Random rand = SecureRandom.getInstanceStrong();
     Histogram[] hs = new Histogram[colNum];
-    System.out.println("3333333333333333");
     for (int i = 0; i < colNum; i++) {
       List<Double> ls = new ArrayList<>();
-      System.out.println("c: " + i);
-      for (int j = 0; j < 10000; j++) {
+      for (int j = 0; j < 10000; j++)
         ls.add(rand.nextDouble() * maxVal);
-        System.out.println("j: " + j);
-      }
-      System.out.println("444444444444444");
       hs[i] = new Histogram(ls, group);
     }
     Constant.ROW_NUM = BigDecimal.valueOf(rowNum);
@@ -140,9 +132,10 @@ public class Comparison {
 
   public static void main(String args[]) throws NoSuchAlgorithmException, IOException, ClassNotFoundException {
     // generate and serialize data
-    int minCol = Integer.parseInt(args[0]);
-    int maxCol = Integer.parseInt(args[1]);
-    generateDataAndQueries(minCol, maxCol);
+//    int minCol = Integer.parseInt(args[0]);
+//    int maxCol = Integer.parseInt(args[1]);
+//    generateDataAndQueries(minCol, maxCol);
 //    writeSolutions("compare\\solutions.txt", 1, 10);
+    compare("comp.csv", 7, 7);
   }
 }

@@ -6,6 +6,7 @@ import query.Query;
 import replica.MultiReplicas;
 import replica.Replica;
 import constant.Constant;
+import searchall.SearchAll;
 
 import java.io.File;
 import java.io.IOException;
@@ -143,7 +144,8 @@ public class SimulateAnneal {
     int seed = rand.nextInt(100);
     int[] newOrder = null;
     if (isIn(seed, 0, 5))
-      newOrder = ArrayTransform.shuffle(replica.getOrder());
+//      newOrder = ArrayTransform.shuffle(replica.getOrder());
+      newOrder = ArrayTransform.swap(replica.getOrder(), pos0, pos1);
     else if (isIn(seed, 5, 20))
       newOrder = ArrayTransform.shuffle(replica.getOrder(), pos0, len);
     else if (isIn(seed, 20, 40))
@@ -155,7 +157,8 @@ public class SimulateAnneal {
     else if (isIn(seed, 80, 95))
       newOrder = ArrayTransform.reverse(replica.getOrder(), pos0, len);
     else if (isIn(seed, 95, 100))
-      newOrder = ArrayTransform.reverse(replica.getOrder());
+//      newOrder = ArrayTransform.reverse(replica.getOrder());
+      newOrder = ArrayTransform.swap(replica.getOrder(), pos0, pos1);
     if (newOrder == null) throw new NullPointerException();
     return new Replica(replica.getOriginalDataTable(), newOrder);
   }
@@ -251,10 +254,9 @@ public class SimulateAnneal {
    * @return a multi-replica
    */
   private MultiReplicas initSolution() {
-    MultiReplicas newMultiReplica = new MultiReplicas();
-    for (int i = 0; i < replicaNumber; i++)
-      newMultiReplica.add(new Replica(data, ArrayTransform.random(data.getColNum())));
-    return newMultiReplica;
+    return new SearchAll(data, queries).optimal();
+//    for (int i = 0; i < replicaNumber; i++)
+//      newMultiReplica.add(new Replica(data, ArrayTransform.random(data.getColNum())));
   }
 
   /**

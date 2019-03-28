@@ -1,4 +1,4 @@
-package seachall;
+package searchall;
 
 import constant.Constant;
 import cost.CostModel;
@@ -10,7 +10,6 @@ import replica.Replica;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Stack;
 
 public class SearchAll {
 
@@ -20,6 +19,8 @@ public class SearchAll {
 
   private BigDecimal optimalCost = null;
   private MultiReplicas multiReplicas;
+
+  private List<BigDecimal> history = new ArrayList<>();
 
 
   public SearchAll(DataTable dataTable, Query[] queries) {
@@ -31,12 +32,15 @@ public class SearchAll {
 
   public MultiReplicas optimal() {
     List<int[]> singleReplicas = Permutation.getPerm(0, dataTable.getColNum() - 1, dataTable.getColNum(), false);
-    List<int[]> replicasOrder = Permutation.getPerm(0, Constant.REPLICA_NUMBER - 1, Constant.REPLICA_NUMBER, true);
+    List<int[]> replicasOrder = Permutation.getPerm(0, singleReplicas.size()-1, Constant.REPLICA_NUMBER, true);
+    int counter = 0;
     for (int[] ro : replicasOrder) {
       MultiReplicas m = new MultiReplicas();
-      for (int replciaIdx : ro)
-        m.add(new Replica(dataTable, singleReplicas.get(replciaIdx)));
+      for (int replicaIdx : ro)
+        m.add(new Replica(dataTable, singleReplicas.get(replicaIdx)));
       BigDecimal cost = CostModel.cost(m, queries);
+      System.out.println(counter++ + "/" + replicasOrder.size());
+      history.add(cost);
       if(optimalCost == null || optimalCost.compareTo(cost) > 0){
         optimalCost = cost;
         multiReplicas = new MultiReplicas(m);
@@ -47,5 +51,9 @@ public class SearchAll {
 
   public BigDecimal getOptimalCost() {
     return optimalCost;
+  }
+
+  public List<BigDecimal> getHistory() {
+    return history;
   }
 }

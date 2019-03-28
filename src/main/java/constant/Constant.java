@@ -11,7 +11,7 @@ public class Constant {
   public static BigDecimal ROW_NUM = new BigDecimal("1");
 
   // Objective System
-  public static final int REPLICA_NUMBER = 3;
+  public static int REPLICA_NUMBER = 3;
 
   // CostModel
   public static final BigDecimal COST_SCALE = BigDecimal.valueOf(1);

@@ -1,7 +1,6 @@
-package seachall;
+package searchall;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Stack;
 
@@ -9,6 +8,8 @@ public class Permutation {
   private static List<int[]> permutations = new ArrayList<>();
   private static Stack<Integer> s = new Stack<Integer>();
   private static boolean[] used = new boolean[10000];
+
+  private Permutation(){}
 
   /**
    * Getting a list of permutation (array)
@@ -50,7 +51,7 @@ public class Permutation {
     }
     for (int i = minv; i <= maxv; i++) {
       s.push(i);
-      runPermAllowDup(minv, maxv, curnum + 1, maxnum);
+      runPermAllowDup(i, maxv, curnum + 1, maxnum);
       s.pop();
     }
   }

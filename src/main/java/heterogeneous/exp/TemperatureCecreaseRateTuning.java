@@ -6,13 +6,9 @@ import datamodel.DataTable;
 import heterogeneous.SimulateAnneal;
 import query.Query;
 import replica.MultiReplicas;
-import replica.Replica;
 
 import java.io.*;
-import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class TemperatureCecreaseRateTuning {
   static Query[] getQueries(int colNums) throws IOException, ClassNotFoundException {

@@ -1,13 +1,13 @@
 package divergentdesign;
 
 
-import cost.CostModel;
-import heterogeneous.SimulateAnneal;
 import constant.Constant;
+import cost.CostModel;
 import datamodel.DataTable;
 import query.Query;
 import replica.MultiReplicas;
 import replica.Replica;
+import searchall.SearchAll;
 
 import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
@@ -150,9 +150,10 @@ public class DivgDesign {
    * @param queries, a collection of queries
    * @return a recommended replica
    */
-  private Replica recommendReplica(List<Query> queries) throws NoSuchAlgorithmException {
-    return (Replica) new SimulateAnneal(data, queries.toArray(new Query[0]), 1)
-            .optimal().getReplicas().keySet().toArray()[0];
+  private Replica recommendReplica(List<Query> queries) {
+    return (Replica) new SearchAll(data, queries.toArray(new Query[0])).optimal().getReplicas().keySet().toArray()[0];
+//    return (Replica) new SimulateAnneal(data, queries.toArray(new Query[0]), 1)
+//            .optimal().getReplicas().keySet().toArray()[0];
   }
 
   /**
