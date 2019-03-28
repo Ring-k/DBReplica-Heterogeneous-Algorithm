@@ -31,6 +31,7 @@ public class Iteration {
         Constant.OPTIMAL_COUNT_THRESHOLD = i;
         Constant.LOCAL_ITERATION_NUM = j;
         SimulateAnneal sa = new SimulateAnneal(dataTable, queries, 3);
+        System.out.println("start sa");
         sa.optimal();
         String line = "";
         line += i + "," + j + "," + sa.getOptimalCost() + "\n";

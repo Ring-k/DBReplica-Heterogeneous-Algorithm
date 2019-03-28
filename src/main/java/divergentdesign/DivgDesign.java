@@ -151,7 +151,7 @@ public class DivgDesign {
    * @return a recommended replica
    */
   private Replica recommendReplica(List<Query> queries) {
-    return (Replica) new SearchAll(data, queries.toArray(new Query[0])).optimal().getReplicas().keySet().toArray()[0];
+    return new SearchAll(data, queries.toArray(new Query[0])).optimalReplica();
 //    return (Replica) new SimulateAnneal(data, queries.toArray(new Query[0]), 1)
 //            .optimal().getReplicas().keySet().toArray()[0];
   }

@@ -31,6 +31,13 @@ public class CostModel {
     return replica.scanRows(query).multiply(Constant.COST_SCALE);
   }
 
+  public static BigDecimal cost(Replica replica, Query[] queries){
+    BigDecimal ans = new BigDecimal("0");
+    for(Query q : queries)
+      ans = ans.add(cost(replica, q));
+    return ans;
+  }
+
   /**
    * Calculate the cost of evaluating a query on multi-replica. Calculate the cost of query
    * evaluated on each replca, and take the minimum value as the result

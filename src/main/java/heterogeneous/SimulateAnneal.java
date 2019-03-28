@@ -1,16 +1,13 @@
 package heterogeneous;
 
+import constant.Constant;
 import cost.CostModel;
 import datamodel.DataTable;
 import query.Query;
 import replica.MultiReplicas;
 import replica.Replica;
-import constant.Constant;
 import searchall.SearchAll;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -84,7 +81,7 @@ public class SimulateAnneal {
    */
   public MultiReplicas optimal() throws NoSuchAlgorithmException {
     initTemperature();
-    multiReplicas = initSolution();
+    multiReplicas = initSolutionByOptimalReplica();
     optimalCost = CostModel.cost(multiReplicas, queries);
     costHistory.add(optimalCost.doubleValue());
     while (!isGlobalConverge()) {
@@ -236,11 +233,12 @@ public class SimulateAnneal {
     BigDecimal max = null;
     BigDecimal min = null;
     for (int i = 0; i < 20; i++) {
-      m = initSolution();
+      m = initSolutioRandom();
       BigDecimal curCost = CostModel.cost(m, queries);
       if (max == null || max.compareTo(curCost) < 0) max = curCost;
       if (min == null || min.compareTo(curCost) > 0) min = curCost;
     }
+//    System.out.println("xxxxxxxxxxxxxxx");
     if (min == null) throw new NullPointerException();
     temperature = min.subtract(max)
             .divide(BigDecimal.valueOf(Math.log(Constant.TEMPERATURE_INIT_SEED)),
@@ -253,10 +251,19 @@ public class SimulateAnneal {
    *
    * @return a multi-replica
    */
-  private MultiReplicas initSolution() {
-    return new SearchAll(data, queries).optimal();
-//    for (int i = 0; i < replicaNumber; i++)
-//      newMultiReplica.add(new Replica(data, ArrayTransform.random(data.getColNum())));
+  private MultiReplicas initSolutionByOptimalReplica() {
+    MultiReplicas newMultiReplica = new MultiReplicas();
+    Replica r =  new SearchAll(data, queries).optimalReplica();
+    for (int i = 0; i < replicaNumber; i++)
+      newMultiReplica.add(new Replica(r));
+    return newMultiReplica;
+  }
+
+  private MultiReplicas initSolutioRandom(){
+    MultiReplicas newMultiReplica = new MultiReplicas();
+    for (int i = 0; i < replicaNumber; i++)
+      newMultiReplica.add(new Replica(data, ArrayTransform.random(data.getColNum())));
+    return newMultiReplica;
   }
 
   /**

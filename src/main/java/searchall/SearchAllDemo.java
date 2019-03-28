@@ -4,9 +4,11 @@ import constant.Constant;
 import datamodel.DataTable;
 import query.Query;
 import replica.MultiReplicas;
+import replica.Replica;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 
 public class SearchAllDemo {
@@ -27,12 +29,12 @@ public class SearchAllDemo {
     Query[] queries = getQueries(col);
     SearchAll sa = new SearchAll(dataTable, queries);
     Constant.REPLICA_NUMBER = 1;
-    MultiReplicas m = sa.optimal();
+    Replica r = sa.optimalReplica();
     List<BigDecimal> history = sa.getHistory();
-    System.out.println(m.getOrderString());
+    System.out.println(Arrays.toString(r.getOrder()));
     System.out.println(sa.getOptimalCost());
 
-    File f = new File("search_all_history.csv");
+    File f = new File("search_all_history1.csv");
     if(!f.exists()) f.createNewFile();
     FileWriter fw = new FileWriter(f, true);
     for( BigDecimal d : history)
