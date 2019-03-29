@@ -2,6 +2,8 @@ package query;
 
 import datamodel.DataTable;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Random;
 
 public class QueryGenerator {
@@ -9,32 +11,34 @@ public class QueryGenerator {
   Query[] queries;
   DataTable dataTable;
 
-  public QueryGenerator(int numberOfQueries, DataTable dataTable) {
+  public QueryGenerator(int numberOfQueries, DataTable dataTable) throws NoSuchAlgorithmException {
     queries = new Query[numberOfQueries];
     this.dataTable = dataTable;
     generate();
   }
 
-  private void generate() {
-    int colNum = dataTable.getColNum();
-    Random rand;
-    for (int i = 0; i < queries.length; i++) {
-      int rangeColIdx = (int) (Math.random() * colNum);
-      double min = dataTable.getColHistograms()[rangeColIdx].getMinX();
-      double max = dataTable.getColHistograms()[rangeColIdx].getMaxX();
-      double lowerBound = Math.random() * (max - min) + min;
-      double upperBound = Math.random() * (max - lowerBound) + lowerBound;
 
-      // init point vals
-      double[] pntVals = new double[colNum];
-      for(int j = 0; j < colNum; j++){
-        if(j == rangeColIdx) continue;
-        double ptMin = dataTable.getColHistograms()[j].getMinX();
-        double ptMax = dataTable.getColHistograms()[j].getMaxX();
-        pntVals[j] = Math.random()*(ptMax-ptMin)+ptMin;
+  private void generate() throws NoSuchAlgorithmException {
+    int colNum = dataTable.getColNum();
+    Random rand = SecureRandom.getInstanceStrong();
+    for (int i = 0; i < queries.length; i++) { // for a query
+      MiniQuery[] miniQueries = new MiniQuery[colNum];
+      for (int j = 0; j < colNum; j++) { //  of each column
+        int drawLot = rand.nextInt(99) + 1;
+        double minv = dataTable.getColHistograms()[j].getMinX();
+        double maxv = dataTable.getColHistograms()[j].getMaxX();
+        if (drawLot <= 33) {
+          double v = Math.random() * (maxv - minv) + minv;
+          miniQueries[j] = new PointQuery(v);
+        } else if (drawLot <= 66) {
+          double lowerBound = Math.random() * (maxv - minv) + minv;
+          double upperBound = Math.random() * (maxv - lowerBound) + lowerBound;
+          miniQueries[j] = new RangeQuery(lowerBound, upperBound);
+        } else {
+          miniQueries[j] = new RangeQuery(minv, maxv);
+        }
       }
-      Query q = new Query(rangeColIdx, lowerBound, upperBound, pntVals, 1);
-      queries[i] = q;
+      queries[i] = new Query(miniQueries, 1);
     }
   }
 

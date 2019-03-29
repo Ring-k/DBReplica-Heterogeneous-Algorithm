@@ -1,6 +1,7 @@
 package replica;
 
 import datamodel.DataTable;
+import query.PointQuery;
 import query.Query;
 
 import java.math.BigDecimal;
@@ -47,31 +48,31 @@ public class Replica {
     double res = 1.0;
     for (int i = 0; i < afterOrder.getRangeColIndex(); i++)
       res *= dataTable.getColHistograms()[i]
-              .getProbability(afterOrder.getPointVals()[i]);
+              .getProbability(((PointQuery)afterOrder.getMiniQueries()[i]).getValue());
 
     res *= dataTable.getColHistograms()[afterOrder.getRangeColIndex()]
             .getProbability(afterOrder.getLowerBound(), afterOrder.getUpperBound());
     return res;
   }
 
-  public double resultProbability(Query query) {
-    if (query.getColNum() != dataTable.getColHistograms().length)
-      throw new IllegalArgumentException();
-    Query afterOrder = query.getQuery(order);
-    double res = scanProbability(query);
-    for (int i = afterOrder.getRangeColIndex() + 1; i < dataTable.getColHistograms().length; i++)
-      res *= dataTable.getColHistograms()[i]
-              .getProbability(afterOrder.getPointVals()[i]);
-    return res;
-  }
+//  public double resultProbability(Query query) {
+//    if (query.getColNum() != dataTable.getColHistograms().length)
+//      throw new IllegalArgumentException();
+//    Query afterOrder = query.getQuery(order);
+//    double res = scanProbability(query);
+//    for (int i = afterOrder.getRangeColIndex() + 1; i < dataTable.getColHistograms().length; i++)
+//      res *= dataTable.getColHistograms()[i]
+//              .getProbability(afterOrder.getPointVals()[i]);
+//    return res;
+//  }
 
   public BigDecimal scanRows(Query query) {
     return dataTable.getRowNum().multiply(BigDecimal.valueOf(scanProbability(query)));
   }
 
-  public BigDecimal resultRows(Query query) {
-    return dataTable.getRowNum().multiply(BigDecimal.valueOf(resultProbability(query)));
-  }
+//  public BigDecimal resultRows(Query query) {
+//    return dataTable.getRowNum().multiply(BigDecimal.valueOf(resultProbability(query)));
+//  }
 
   @Override
   public String toString() {

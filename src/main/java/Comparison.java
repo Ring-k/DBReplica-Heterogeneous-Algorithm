@@ -136,7 +136,7 @@ public class Comparison {
       // method 3 dd loading factor = 3
       dd = new DivgDesign(dataTable, queries, 3, 3, 1000, 0.0000000000000000000001);
       cost = CostModel.cost(dd.optimal(), queries).doubleValue();
-      line += "," + cost + "\n";
+      line += "," + cost;
 
       // Rita, m=1
       Rita rt = new Rita(dataTable, queries, 3).initSolution(replica);
@@ -144,7 +144,6 @@ public class Comparison {
       line += "," + cost + "\n";
 
       System.out.println(line);
-      fw.write(line);
 
     }
     fw.close();
