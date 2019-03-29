@@ -40,7 +40,7 @@ public class ArrayTransform {
    * @param arr, the original array
    * @return an array after shuffling
    */
-  static int[] shuffle(int[] arr) {
+  public static int[] shuffle(int[] arr) {
     List<Integer> ls = Arrays.asList(intToInteger(arr));
     Collections.shuffle(ls);
     return integerToInt(ls.toArray(new Integer[0]));
@@ -54,7 +54,7 @@ public class ArrayTransform {
    * @param length, length of the part
    * @return shuffled array
    */
-  static int[] shuffle(int[] a, int p, int length) {
+  public static int[] shuffle(int[] a, int p, int length) {
     Integer[] arr = intToInteger(a);
     if (length < 1 || length + p > arr.length || p < 0 || p >= arr.length)
       throw new IllegalArgumentException();
@@ -72,7 +72,7 @@ public class ArrayTransform {
    * @param n, the number of integer in the array, or upper bound {exclusive}
    * @return an array in random order
    */
-  static int[] random(int n) {
+  public static int[] random(int n) {
     List<Integer> ls = new ArrayList<>();
     for (int i = 0; i < n; i++) ls.add(i);
     Collections.shuffle(ls);
@@ -87,7 +87,7 @@ public class ArrayTransform {
    * @param j, position j
    * @return new array
    */
-  static int[] swap(int[] a, int i, int j) {
+  public static int[] swap(int[] a, int i, int j) {
     if (i < 0 || j < 0 || i >= a.length || j >= a.length)
       throw new IllegalArgumentException();
     if (i == j) return a;
@@ -108,7 +108,7 @@ public class ArrayTransform {
    * @param j, index j
    * @return new array
    */
-  static int[] insertBefore(int[] a, int i, int j) {
+  public static int[] insertBefore(int[] a, int i, int j) {
     int[] arr = new int[a.length];
     System.arraycopy(a, 0, arr, 0, a.length);
     if (i < 0 || j < 0 || i >= arr.length || j >= arr.length)
@@ -133,7 +133,7 @@ public class ArrayTransform {
    * @param j, index j
    * @return new array
    */
-  static int[] insertAfter(int[] a, int i, int j) {
+  public static int[] insertAfter(int[] a, int i, int j) {
     int[] arr = new int[a.length];
     System.arraycopy(a, 0, arr, 0, a.length);
     if (i < 0 || j < 0 || i >= arr.length || j >= arr.length)
@@ -155,7 +155,7 @@ public class ArrayTransform {
    * @param arr, original array
    * @return new array after reversing
    */
-  static int[] reverse(int[] arr) {
+  public static int[] reverse(int[] arr) {
     List<Integer> list = Arrays.asList(intToInteger(arr));
     Collections.reverse(list);
     return integerToInt(list.toArray(new Integer[0]));
@@ -169,7 +169,7 @@ public class ArrayTransform {
    * @param length, length of reversing range
    * @return new array after part reversed
    */
-  static int[] reverse(int[] a, int p, int length) {
+  public static int[] reverse(int[] a, int p, int length) {
     Integer[] arr = intToInteger(a);
     if (length < 1 || length + p > arr.length || p < 0 || p >= arr.length)
       throw new IllegalArgumentException();

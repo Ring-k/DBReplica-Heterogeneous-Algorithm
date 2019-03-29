@@ -1,8 +1,11 @@
-package heterogeneous;
+package rita;
+
 
 import constant.Constant;
 import cost.CostModel;
 import datamodel.DataTable;
+import heterogeneous.ArrayTransform;
+import javafx.util.Pair;
 import query.Query;
 import replica.MultiReplicas;
 import replica.Replica;
@@ -11,13 +14,9 @@ import searchall.SearchAll;
 import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
-
-public class SimulateAnneal {
+public class Rita {
 
   private DataTable data;
   private Query[] queries;
@@ -26,83 +25,51 @@ public class SimulateAnneal {
   private double temperature;
   private int iteration = 0;
   private int optimalCnt = 0;
+  private double skewFactor = 0.0; // 0 = balance case
 
   // the solution
   private MultiReplicas multiReplicas = null;
   private BigDecimal optimalCost;
   private List<Double> costHistory = new ArrayList<>();
 
-  /**
-   * Constructor
-   *
-   * @param dataTable, info of the data table
-   * @param queries,   workload
-   */
-  public SimulateAnneal(DataTable dataTable, Query[] queries) {
+  public Rita(DataTable dataTable, Query[] queries) {
     this.data = dataTable;
     this.queries = queries;
     this.replicaNumber = Constant.REPLICA_NUMBER;
+    this.skewFactor = Constant.SKEW_FACTOR;
   }
 
-  /**
-   * Constructor
-   *
-   * @param dataTable,     info of the data table
-   * @param queries,       workload
-   * @param replicaNumber, number of replica
-   */
-  public SimulateAnneal(DataTable dataTable, Query[] queries, int replicaNumber) {
+  public Rita(DataTable dataTable, Query[] queries, int replicaNumber) {
     this.data = dataTable;
     this.queries = queries;
     this.replicaNumber = replicaNumber;
+    this.skewFactor = Constant.SKEW_FACTOR;
   }
 
-
-  /*
-   * Run the algorithm
-   * 1. initialize temperature
-   * 2. initialize a multi-replica solution,calculate the cost and record it
-   * 3. loop [check if global converge]
-   * 4.  | loop [check if local converge]
-   * 5.  |  | generate a new multi-replica solution
-   * 6.  |  | calculate the cost
-   * 7.  |  | if [choose this new multi-replica solution]
-   * 8.  |  |  | record the solution and cost
-   * 8.  |  | end if
-   * 9.  |  end loop
-   * 10. |  if [choose local optimal as global optimal]
-   * 11. |   |  update global optimal
-   * 12. |  else
-   * 13. |   |  increase same optimal counter
-   * 14. |  end if
-   * 15. |  decrease temperature
-   * 16. end loop
-   * 17. return optimal solution
+  /**
+   * Same as Simulate Anneal
+   *
+   * @return
+   * @throws NoSuchAlgorithmException
    */
   public MultiReplicas optimal() throws NoSuchAlgorithmException {
     initTemperature();
-    if(multiReplicas == null)
+    if (multiReplicas == null)
       multiReplicas = initSolutionByOptimalReplica();
-    optimalCost = CostModel.cost(multiReplicas, queries);
+    optimalCost = cost(multiReplicas, queries).getValue();
     costHistory.add(optimalCost.doubleValue());
     while (!isGlobalConverge()) {
-//      System.out.println(">>>>>>>t: " + temperature);
       MultiReplicas curMultiReplica = new MultiReplicas(multiReplicas);
       BigDecimal curCost = optimalCost;
       while (!isLocalConverge()) {
         // generate new solution
         MultiReplicas newMultiReplica = generateNewMultiReplica(curMultiReplica);
-        BigDecimal newCost = CostModel.cost(newMultiReplica, queries);
-        if (isChosen(newCost, curCost)) {
+        Pair costPair = cost(newMultiReplica, queries);
+        boolean isBalance = (boolean) costPair.getKey();
+        BigDecimal newCost = (BigDecimal) costPair.getValue();
+        if (isBalance && isChosen(newCost, curCost)) {
           curMultiReplica = newMultiReplica;
           curCost = newCost;
-//          System.out.println("iteration" + iteration + ": "
-//                  + curCost.setScale(2, BigDecimal.ROUND_HALF_UP)
-//                  + ", " + curMultiReplica.getOrderString());
-        } else {
-//          System.out.println("iteration" + iteration + ": "
-//                  + newCost.setScale(2, BigDecimal.ROUND_HALF_UP)
-//                  + ", " + newMultiReplica.getOrderString() + " drop");
         }
         costHistory.add(curCost.doubleValue());
         iteration++;
@@ -240,7 +207,6 @@ public class SimulateAnneal {
       if (max == null || max.compareTo(curCost) < 0) max = curCost;
       if (min == null || min.compareTo(curCost) > 0) min = curCost;
     }
-//    System.out.println("xxxxxxxxxxxxxxx");
     if (min == null) throw new NullPointerException();
     temperature = min.subtract(max)
             .divide(BigDecimal.valueOf(Math.log(Constant.TEMPERATURE_INIT_SEED)),
@@ -248,7 +214,7 @@ public class SimulateAnneal {
             .doubleValue();
   }
 
-  public SimulateAnneal initSolution(Replica r){
+  public Rita initSolution(Replica r) {
     multiReplicas = new MultiReplicas();
     for (int i = 0; i < replicaNumber; i++)
       multiReplicas.add(new Replica(r));
@@ -262,13 +228,13 @@ public class SimulateAnneal {
    */
   private MultiReplicas initSolutionByOptimalReplica() {
     MultiReplicas newMultiReplica = new MultiReplicas();
-    Replica r =  new SearchAll(data, queries).optimalReplica();
+    Replica r = new SearchAll(data, queries).optimalReplica();
     for (int i = 0; i < replicaNumber; i++)
       newMultiReplica.add(new Replica(r));
     return newMultiReplica;
   }
 
-  private MultiReplicas initSolutioRandom(){
+  private MultiReplicas initSolutioRandom() {
     MultiReplicas newMultiReplica = new MultiReplicas();
     for (int i = 0; i < replicaNumber; i++)
       newMultiReplica.add(new Replica(data, ArrayTransform.random(data.getColNum())));
@@ -305,4 +271,39 @@ public class SimulateAnneal {
     return costHistory;
   }
 
+  public Pair<Boolean, BigDecimal> cost(MultiReplicas multiReplicas, Query[] queries) {
+    Map<Replica, BigDecimal> ans = new HashMap<>();
+    for (Replica r : multiReplicas.getReplicas().keySet())
+      ans.put(r, new BigDecimal("0"));
+    for (Query q : queries) {
+      Pair<Replica, BigDecimal> costPair = CostModel.cost(multiReplicas, q);
+      BigDecimal cost = ans.get(costPair.getKey()).add(costPair.getValue());
+      ans.put(costPair.getKey(), cost);
+    }
+
+    for (Replica r : ans.keySet()) {
+      int replicaNumber = multiReplicas.getReplicas().get(r);
+      if (replicaNumber != 1) {
+        ans.put(r, ans.get(r).divide(BigDecimal.valueOf(replicaNumber),
+                100, BigDecimal.ROUND_HALF_UP));
+      }
+    }
+
+    BigDecimal res = null;
+    for (BigDecimal n : ans.values()) {
+      if (res == null || res.compareTo(n) < 0)
+        res = n;
+    }
+
+    BigDecimal min = null;
+    BigDecimal max = null;
+    for (BigDecimal n : ans.values()) {
+      if (min == null || min.compareTo(n) > 0) min = n;
+      if (max == null || max.compareTo(n) < 0) max = n;
+    }
+
+//    System.out.println(min.toString());
+    boolean isBalance = min.multiply(BigDecimal.valueOf(1 + skewFactor)).compareTo(max) >= 0;
+    return new Pair<>(isBalance, res);
+  }
 }

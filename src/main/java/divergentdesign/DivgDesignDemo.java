@@ -14,6 +14,16 @@ import java.util.List;
 import java.util.Random;
 
 public class DivgDesignDemo {
+  static Query[] getQueries(int colNums) throws IOException, ClassNotFoundException {
+    ObjectInputStream ois = new ObjectInputStream(new FileInputStream("queries_" + colNums));
+    return (Query[]) ois.readObject();
+  }
+
+  static DataTable getDataTable(int colNums) throws IOException, ClassNotFoundException {
+    ObjectInputStream ois = new ObjectInputStream(new FileInputStream("data_table_" + colNums));
+    return (DataTable) ois.readObject();
+  }
+
   public static void main(String args[]) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
     // to serialize data into file, see demo of heterogeneous
 
@@ -23,9 +33,8 @@ public class DivgDesignDemo {
 //    ois = new ObjectInputStream(new FileInputStream("data_table"));
 //    DataTable dataTable = (DataTable) ois.readObject();
 
-    DataTable dataTable = generateDataTable(8, 1000, 10);
-    Query[] queries = new QueryGenerator(1000, dataTable).getQueries();
-
+    DataTable dataTable = getDataTable(7);
+    Query[] queries = getQueries(7);
 
     DivgDesign d = new DivgDesign(dataTable, queries);
     MultiReplicas m = d.optimal();
@@ -33,7 +42,7 @@ public class DivgDesignDemo {
     System.out.println("cost: " + d.getOptimalCost());
     System.out.println("history: " + d.getHistory());
 
-    writeHistory(d.getHistory());
+//    writeHistory(d.getHistory());
 
 
   }

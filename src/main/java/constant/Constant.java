@@ -23,9 +23,12 @@ public class Constant {
   public static int OPTIMAL_COUNT_THRESHOLD = 60;
 
   // Divergent Design
-  public static  int LOAD_BALANCE_FACTOR = 2;
+  public static  int LOAD_BALANCE_FACTOR = 1;
   public static  int MAX_ITERATION = 1000;
   public static  double EPSILON = 0.001;
+
+  // Rita
+  public static double SKEW_FACTOR = 0.5;
 
 
 }

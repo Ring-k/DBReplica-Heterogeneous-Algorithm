@@ -31,7 +31,7 @@ public class DivgDesign {
   private int replicaNum = Constant.REPLICA_NUMBER;
   private int loadBalanceFactor = Constant.LOAD_BALANCE_FACTOR;
   private int maxIteration = Constant.MAX_ITERATION;
-  private double epsilone = Constant.EPSILON;
+  private double epsilon = Constant.EPSILON;
 
   // subset of workload, group queries
   private List<Query>[] workloadSubsets;
@@ -57,7 +57,7 @@ public class DivgDesign {
     this.replicaNum = replicaNum;
     this.loadBalanceFactor = loadBalanceFactor;
     this.maxIteration = maxIteration;
-    this.epsilone = epsilon;
+    this.epsilon = epsilon;
     this.workload = new Query[queries.length];
     System.arraycopy(queries, 0, workload, 0, workload.length);
     workloadSubsets = new List[replicaNum];
@@ -102,9 +102,15 @@ public class DivgDesign {
     int it = 0;
     double curCost;
     while (true) { // here begins the iteration
-      for (int i = 0; i < replicaNum; i++)
+      MultiReplicas m = new MultiReplicas();
+      for (int i = 0; i < replicaNum; i++) {
         multiReplicas[i] = recommendReplica(workloadSubsets[i]);
-      curCost = totalCost(multiReplicas);
+        m.add(new Replica(recommendReplica(workloadSubsets[i])));
+      }
+
+//      curCost = totalCost(multiReplicas);
+      curCost = CostModel.cost(m, workload).doubleValue();
+      System.out.println(curCost);//TODO
       if (isIterationTerminate(it, curCost)) break;
       optimalCost = curCost;
       history.add(optimalCost);
@@ -121,6 +127,7 @@ public class DivgDesign {
       }
       System.arraycopy(curSubQueries, 0, workloadSubsets, 0, replicaNum);
     }
+    System.out.println();//TODO
     optimalCost = curCost;
     history.add(optimalCost);
     MultiReplicas res = new MultiReplicas();
@@ -167,7 +174,7 @@ public class DivgDesign {
    */
   private boolean isIterationTerminate(int curIteration, double curCost) {
     if (optimalCost == 0 || curIteration == 0) return false;
-    if (Math.abs(curCost - optimalCost) < epsilone) return true;
+    if (Math.abs(curCost - optimalCost) < epsilon) return true;
     return curIteration >= maxIteration;
   }
 
