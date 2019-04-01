@@ -40,6 +40,8 @@ public class DivgDesign {
   private double optimalCost;
   private List<Double> history;
 
+  private boolean isNewMethod;
+
   /**
    * Constructor, using customized input variables, replica number, load balancing factor, iteration
    * threshold, epsilon threshold.
@@ -52,7 +54,7 @@ public class DivgDesign {
    * @param epsilon,           input epsilon threshold
    */
   public DivgDesign(DataTable data, Query[] queries,
-                    int replicaNum, int loadBalanceFactor, int maxIteration, double epsilon) {
+                    int replicaNum, int loadBalanceFactor, int maxIteration, double epsilon, boolean isNewMethod) {
     this.data = new DataTable(data);
     this.replicaNum = replicaNum;
     this.loadBalanceFactor = loadBalanceFactor;
@@ -64,6 +66,7 @@ public class DivgDesign {
     for (int i = 0; i < workloadSubsets.length; i++)
       workloadSubsets[i] = new ArrayList<>();
     this.history = new ArrayList<>();
+    this.isNewMethod = isNewMethod;
   }
 
   /**
@@ -80,10 +83,11 @@ public class DivgDesign {
     for (int i = 0; i < workloadSubsets.length; i++)
       workloadSubsets[i] = new ArrayList<>();
     this.history = new ArrayList<>();
+    this.isNewMethod = Constant.IS_NEW_METHOD;
   }
 
 
-  /*
+  /**
    * get optimal multiple replicas.
    * 1. pick a random m-balanced design
    * 2. ----> start iteration
@@ -94,6 +98,7 @@ public class DivgDesign {
    * 7. --  update global record,                       |
    * 8. update global record <---------------------------
    * 9. return multiple replica
+   *
    * @return
    */
   public MultiReplicas optimal() throws NoSuchAlgorithmException {
@@ -107,9 +112,10 @@ public class DivgDesign {
         multiReplicas[i] = recommendReplica(workloadSubsets[i]);
         m.add(new Replica(recommendReplica(workloadSubsets[i])));
       }
-
-//      curCost = totalCost(multiReplicas);
-      curCost = CostModel.cost(m, workload).doubleValue();
+      if (isNewMethod)
+        curCost = CostModel.cost(m, workload).doubleValue();
+      else
+        curCost = totalCost(multiReplicas);
       System.out.println(curCost);//TODO
       if (isIterationTerminate(it, curCost)) break;
       optimalCost = curCost;

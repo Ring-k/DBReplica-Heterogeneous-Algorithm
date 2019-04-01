@@ -29,6 +29,7 @@ public class Constant {
 
   // Rita
   public static double SKEW_FACTOR = 0.5;
+  public static boolean IS_NEW_METHOD = false;
 
 
 }

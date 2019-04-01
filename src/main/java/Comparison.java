@@ -67,38 +67,38 @@ public class Comparison {
     ObjectInputStream ois = new ObjectInputStream(new FileInputStream("data_table_" + colNums));
     return (DataTable) ois.readObject();
   }
-
-  static void writeSolutions(String outPutPath, int minCol, int maxCol) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
-    File f = new File("solutions.txt");
-    if (!f.exists()) f.createNewFile();
-    FileWriter fw = new FileWriter(f, true);
-
-    for (int i = minCol; i <= maxCol; i++) {
-      DataTable dataTable = getDataTable(i);
-      Query[] queries = getQueries(i);
-
-      // method 0
-      SimulateAnneal sa = new SimulateAnneal(dataTable, queries, 3);
-      String saString = sa.optimal().getOrderString();
-      fw.write(saString + "0" + "\n");
-
-      // method 1, dd loading factor = 1
-      DivgDesign dd = new DivgDesign(dataTable, queries, 3, 1, 1000, 0.001);
-      String ddString = dd.optimal().getOrderString();
-      fw.write(ddString + "1" + "\n");
-
-      // method 2, dd loading factor = 2
-      dd = new DivgDesign(dataTable, queries, 3, 2, 1000, 0.001);
-      ddString = dd.optimal().getOrderString();
-      fw.write(ddString + "2" + "\n");
-
-      // method 3 dd loading factor = 3
-      dd = new DivgDesign(dataTable, queries, 3, 3, 1000, 0.001);
-      ddString = dd.optimal().getOrderString();
-      fw.write(ddString + "3" + "\n");
-    }
-    fw.close();
-  }
+//
+//  static void writeSolutions(String outPutPath, int minCol, int maxCol) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
+//    File f = new File("solutions.txt");
+//    if (!f.exists()) f.createNewFile();
+//    FileWriter fw = new FileWriter(f, true);
+//
+//    for (int i = minCol; i <= maxCol; i++) {
+//      DataTable dataTable = getDataTable(i);
+//      Query[] queries = getQueries(i);
+//
+//      // method 0
+//      SimulateAnneal sa = new SimulateAnneal(dataTable, queries, 3);
+//      String saString = sa.optimal().getOrderString();
+//      fw.write(saString + "0" + "\n");
+//
+//      // method 1, dd loading factor = 1
+//      DivgDesign dd = new DivgDesign(dataTable, queries, 3, 1, 1000, 0.001);
+//      String ddString = dd.optimal().getOrderString();
+//      fw.write(ddString + "1" + "\n");
+//
+//      // method 2, dd loading factor = 2
+//      dd = new DivgDesign(dataTable, queries, 3, 2, 1000, 0.001);
+//      ddString = dd.optimal().getOrderString();
+//      fw.write(ddString + "2" + "\n");
+//
+//      // method 3 dd loading factor = 3
+//      dd = new DivgDesign(dataTable, queries, 3, 3, 1000, 0.001);
+//      ddString = dd.optimal().getOrderString();
+//      fw.write(ddString + "3" + "\n");
+//    }
+//    fw.close();
+//  }
 
   static void compare(String outPutPath, int minCol, int maxCol) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
     File f = new File(outPutPath);
@@ -118,32 +118,104 @@ public class Comparison {
 
       Replica replica = new SearchAll(dataTable, queries).optimalReplica();
 
-      // method 0
       SimulateAnneal sa = new SimulateAnneal(dataTable, queries, 3).initSolution(replica);
       double cost = CostModel.cost(sa.optimal(), queries).doubleValue();
-      String line = "" + i + "," + cost;
+      String line = "SA: " + i + "," + cost + "\n";
+      String record = "" + cost;
 
-      // method 1, dd loading factor = 1
-      DivgDesign dd = new DivgDesign(dataTable, queries, 3, 1, 1000, 0.0000000000000000000001);
+      DivgDesign dd = new DivgDesign(dataTable, queries, 3, 1, 1000, 0.0000000000000000000001, false);
       cost = CostModel.cost(dd.optimal(), queries).doubleValue();
-      line += "," + cost;
+      line += "Divergent Design, load balance = 1, isNewMethod = false, " + cost + "\n";
+      record += ("," + cost);
 
-      // method 2, dd loading factor = 2
-      dd = new DivgDesign(dataTable, queries, 3, 2, 1000, 0.0000000000000000000001);
+      dd = new DivgDesign(dataTable, queries, 3, 2, 1000, 0.0000000000000000000001, false);
       cost = CostModel.cost(dd.optimal(), queries).doubleValue();
-      line += "," + cost;
+      line += "Divergent Design, load balance = 2, isNewMethod = false, " + cost + "\n";
+      record += ("," + cost);
 
-      // method 3 dd loading factor = 3
-      dd = new DivgDesign(dataTable, queries, 3, 3, 1000, 0.0000000000000000000001);
+      dd = new DivgDesign(dataTable, queries, 3, 3, 1000, 0.0000000000000000000001, false);
       cost = CostModel.cost(dd.optimal(), queries).doubleValue();
-      line += "," + cost;
+      line += "Divergent Design, load balance = 3, isNewMethod = false, " + cost + "\n";
+      record += ("," + cost);
 
-      // Rita, m=1
-      Rita rt = new Rita(dataTable, queries, 3).initSolution(replica);
+      dd = new DivgDesign(dataTable, queries, 3, 1, 1000, 0.0000000000000000000001, true);
+      cost = CostModel.cost(dd.optimal(), queries).doubleValue();
+      line += "Divergent Design, load balance = 1, isNewMethod = true, " + cost + "\n";
+      record += ("," + cost);
+
+      dd = new DivgDesign(dataTable, queries, 3, 2, 1000, 0.0000000000000000000001, true);
+      cost = CostModel.cost(dd.optimal(), queries).doubleValue();
+      line += "Divergent Design, load balance = 2, isNewMethod = true, " + cost + "\n";
+      record += ("," + cost);
+
+      dd = new DivgDesign(dataTable, queries, 3, 3, 1000, 0.0000000000000000000001, true);
+      cost = CostModel.cost(dd.optimal(), queries).doubleValue();
+      line += "Divergent Design, load balance = 3, isNewMethod = true, " + cost + "\n";
+      record += ("," + cost);
+
+      // Rita
+      Rita rt = new Rita(dataTable, queries, 3, 1, 1, 0.5, false).initSolution(replica);
       cost = CostModel.cost(rt.optimal(), queries).doubleValue();
-      line += "," + cost + "\n";
+      line += "RITA, load balance = 1, candidate factor = 1, skew = 0.5, isNewMethod = false, " + cost + "\n";
+      record += ("," + cost);
+
+      rt = new Rita(dataTable, queries, 3, 1, 2, 0.5, false).initSolution(replica);
+      cost = CostModel.cost(rt.optimal(), queries).doubleValue();
+      line += "RITA, load balance = 1, candidate factor = 2, skew = 0.5, isNewMethod = false, " + cost + "\n";
+      record += ("," + cost);
+
+      rt = new Rita(dataTable, queries, 3, 1, 3, 0.5, false).initSolution(replica);
+      cost = CostModel.cost(rt.optimal(), queries).doubleValue();
+      line += "RITA, load balance = 1, candidate factor = 3, skew = 0.5, isNewMethod = false, " + cost + "\n";
+      record += ("," + cost);
+
+      rt = new Rita(dataTable, queries, 3, 2, 2, 0.5, false).initSolution(replica);
+      cost = CostModel.cost(rt.optimal(), queries).doubleValue();
+      line += "RITA, load balance = 2, candidate factor = 2, skew = 0.5, isNewMethod = false, " + cost + "\n";
+      record += ("," + cost);
+
+      rt = new Rita(dataTable, queries, 3, 2, 3, 0.5, false).initSolution(replica);
+      cost = CostModel.cost(rt.optimal(), queries).doubleValue();
+      line += "RITA, load balance = 2, candidate factor = 3, skew = 0.5, isNewMethod = false, " + cost + "\n";
+      record += ("," + cost);
+
+      rt = new Rita(dataTable, queries, 3, 3, 3, 0.5, false).initSolution(replica);
+      cost = CostModel.cost(rt.optimal(), queries).doubleValue();
+      line += "RITA, load balance = 3, candidate factor = 3, skew = 0.5, isNewMethod = false, " + cost + "\n";
+      record += ("," + cost);
+
+      rt = new Rita(dataTable, queries, 3, 1, 1, 0.5, true).initSolution(replica);
+      cost = CostModel.cost(rt.optimal(), queries).doubleValue();
+      line += "RITA, load balance = 1, candidate factor = 1, skew = 0.5, isNewMethod = true, " + cost + "\n";
+      record += ("," + cost);
+
+      rt = new Rita(dataTable, queries, 3, 1, 2, 0.5, true).initSolution(replica);
+      cost = CostModel.cost(rt.optimal(), queries).doubleValue();
+      line += "RITA, load balance = 1, candidate factor = 2, skew = 0.5, isNewMethod = true, " + cost + "\n";
+      record += ("," + cost);
+
+      rt = new Rita(dataTable, queries, 3, 1, 3, 0.5, true).initSolution(replica);
+      cost = CostModel.cost(rt.optimal(), queries).doubleValue();
+      line += "RITA, load balance = 1, candidate factor = 3, skew = 0.5, isNewMethod = true, " + cost + "\n";
+      record += ("," + cost);
+
+      rt = new Rita(dataTable, queries, 3, 2, 2, 0.5, true).initSolution(replica);
+      cost = CostModel.cost(rt.optimal(), queries).doubleValue();
+      line += "RITA, load balance = 2, candidate factor = 2, skew = 0.5, isNewMethod = true, " + cost + "\n";
+      record += ("," + cost);
+
+      rt = new Rita(dataTable, queries, 3, 2, 2, 0.5, true).initSolution(replica);
+      cost = CostModel.cost(rt.optimal(), queries).doubleValue();
+      line += "RITA, load balance = 2, candidate factor = 3, skew = 0.5, isNewMethod = true, " + cost + "\n";
+      record += ("," + cost);
+
+      rt = new Rita(dataTable, queries, 3, 3, 3, 0.5, true).initSolution(replica);
+      cost = CostModel.cost(rt.optimal(), queries).doubleValue();
+      line += "RITA, load balance = 3, candidate factor = 3, skew = 0.5, isNewMethod = true, " + cost + "\n";
+      record += ("," + cost + "\n");
 
       System.out.println(line);
+
 
     }
     fw.close();
@@ -155,6 +227,7 @@ public class Comparison {
 //    int maxCol = Integer.parseInt(args[1]);
 //    generateDataAndQueries(minCol, maxCol);
 //    writeSolutions("compare\\solutions.txt", 1, 10);
+    for(int i = 0; i < 1000; i++)
     compare("comp.csv", 7, 7);
   }
 }

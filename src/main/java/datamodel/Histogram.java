@@ -65,7 +65,7 @@ public class Histogram implements Serializable {
     yCoordinate[getStartIndex(val)]++;
   }
 
-  public void updateProbability(){
+  public void updateProbability() {
     for (int i = 0; i < probability.length; i++)
       probability[i] = (double) yCoordinate[i] / pointsNum;
   }
@@ -129,7 +129,8 @@ public class Histogram implements Serializable {
   public double getProbability(double lowerBound, double upperBound) {
     if (lowerBound > upperBound) throw new IllegalArgumentException();
     if (lowerBound == upperBound) return getProbability(lowerBound);
-    if (lowerBound >= maxX + intervalLength || upperBound < minX) return 0;
+    if (lowerBound >= maxX + intervalLength || upperBound < minX) return 0.0;
+    if (lowerBound == minX && upperBound == maxX) return 1.0;
     int lowerIndex = getStartIndex(lowerBound);
     int upperIndex = getStartIndex(upperBound);
     if (lowerIndex == -1) {

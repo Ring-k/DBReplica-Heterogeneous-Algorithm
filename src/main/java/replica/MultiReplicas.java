@@ -1,7 +1,10 @@
 package replica;
 
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * This class represent a strategy for multiple replicas design. It contains a map from Replica class to Integer.
@@ -44,6 +47,19 @@ public class MultiReplicas {
 //        this.replicas.put(replica, 1);
 //    }
 //  }
+
+  public Replica[] getReplicasArray(boolean isDuplicated){
+    if(isDuplicated) {
+      Replica[] ans = new Replica[getReplicaNum()];
+      int cnt = 0;
+      for (Map.Entry<Replica, Integer> en : replicas.entrySet())
+        for (int i = 0; i < en.getValue(); i++)
+          ans[cnt++] = new Replica(en.getKey());
+      return ans;
+    }else{
+      return replicas.keySet().toArray(new Replica [0]);
+    }
+  }
 
   /**
    * Get the number of replicas

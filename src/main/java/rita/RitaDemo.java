@@ -34,7 +34,7 @@ public class RitaDemo {
 
     for (double i = 0.1; i <= 1; i += 0.1) {
       Constant.SKEW_FACTOR = i;
-      Rita rt = new Rita(dataTable, queries, 3).initSolution(replica);
+      Rita rt = new Rita(dataTable, queries, 3, 2, 2, 0.5, true).initSolution(replica);
       double cost = CostModel.cost(rt.optimal(), queries).doubleValue();
       System.out.println(i + ", " + cost);
     }

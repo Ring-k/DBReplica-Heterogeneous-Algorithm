@@ -27,23 +27,55 @@ public class Rita {
   private int optimalCnt = 0;
   private double skewFactor = 0.0; // 0 = balance case
 
+  private int loadBalanceFactor = 0;
+  private int candidateBalanceFactor = 0;
+  private boolean isNewMethod = false;
+
   // the solution
   private MultiReplicas multiReplicas = null;
   private BigDecimal optimalCost;
   private List<Double> costHistory = new ArrayList<>();
 
+  /**
+   * Constructor, using constant value in Constant model
+   *
+   * @param dataTable info of the table
+   * @param queries   info of the workload
+   */
   public Rita(DataTable dataTable, Query[] queries) {
     this.data = dataTable;
     this.queries = queries;
     this.replicaNumber = Constant.REPLICA_NUMBER;
+    this.loadBalanceFactor = Constant.LOAD_BALANCE_FACTOR;
     this.skewFactor = Constant.SKEW_FACTOR;
+    this.isNewMethod = Constant.IS_NEW_METHOD;
+    if (replicaNumber == loadBalanceFactor) candidateBalanceFactor = replicaNumber;
+    else candidateBalanceFactor = loadBalanceFactor + 1;
   }
 
-  public Rita(DataTable dataTable, Query[] queries, int replicaNumber) {
+
+  /**
+   * @param dataTable              info of the table
+   * @param queries                info of the workload
+   * @param replicaNumber          number of replicas
+   * @param loadBalanceFactor      value of load balance factor m
+   * @param candidateBalanceFactor value of candidate balance factor, greater than m
+   * @param skewFactor             value of skew factor, so tha min(cost) * skewFactor >= max(cost)
+   * @param isNewMethod            if use cask effect objective function or not
+   */
+  public Rita(DataTable dataTable, Query[] queries,
+              int replicaNumber, int loadBalanceFactor, int candidateBalanceFactor, double skewFactor, boolean isNewMethod) {
+    if (loadBalanceFactor > replicaNumber
+            || candidateBalanceFactor < loadBalanceFactor
+            || candidateBalanceFactor > replicaNumber)
+      throw new IllegalArgumentException();
     this.data = dataTable;
     this.queries = queries;
     this.replicaNumber = replicaNumber;
-    this.skewFactor = Constant.SKEW_FACTOR;
+    this.skewFactor = skewFactor;
+    this.loadBalanceFactor = loadBalanceFactor;
+    this.candidateBalanceFactor = candidateBalanceFactor;
+    this.isNewMethod = isNewMethod;
   }
 
   /**
@@ -56,7 +88,7 @@ public class Rita {
     initTemperature();
     if (multiReplicas == null)
       multiReplicas = initSolutionByOptimalReplica();
-    optimalCost = cost(multiReplicas, queries).getValue();
+    optimalCost = cost(multiReplicas, queries, isNewMethod).getValue();
     costHistory.add(optimalCost.doubleValue());
     while (!isGlobalConverge()) {
       MultiReplicas curMultiReplica = new MultiReplicas(multiReplicas);
@@ -64,7 +96,7 @@ public class Rita {
       while (!isLocalConverge()) {
         // generate new solution
         MultiReplicas newMultiReplica = generateNewMultiReplica(curMultiReplica);
-        Pair costPair = cost(newMultiReplica, queries);
+        Pair costPair = cost(newMultiReplica, queries, isNewMethod);
         boolean isBalance = (boolean) costPair.getKey();
         BigDecimal newCost = (BigDecimal) costPair.getValue();
         if (isBalance && isChosen(newCost, curCost)) {
@@ -271,39 +303,141 @@ public class Rita {
     return costHistory;
   }
 
-  public Pair<Boolean, BigDecimal> cost(MultiReplicas multiReplicas, Query[] queries) {
-    Map<Replica, BigDecimal> ans = new HashMap<>();
-    for (Replica r : multiReplicas.getReplicas().keySet())
-      ans.put(r, new BigDecimal("0"));
-    for (Query q : queries) {
-      Pair<Replica, BigDecimal> costPair = CostModel.cost(multiReplicas, q);
-      BigDecimal cost = ans.get(costPair.getKey()).add(costPair.getValue());
-      ans.put(costPair.getKey(), cost);
-    }
 
-    for (Replica r : ans.keySet()) {
-      int replicaNumber = multiReplicas.getReplicas().get(r);
-      if (replicaNumber != 1) {
-        ans.put(r, ans.get(r).divide(BigDecimal.valueOf(replicaNumber),
-                100, BigDecimal.ROUND_HALF_UP));
+  /**
+   * Get the cost of evaluating a workload on a multi-replica strategy.
+   * This method record a map, Replica -> BigDecimal, where the key is each key in multi-replica, the value is
+   * the coat (workload stress) on that replica. The cost is calculated in an accumulative way, traverse all queries
+   * in the workload, calculate cost(multi-replica, query), and then add the cost of corresponding replica.
+   * If the number of replica is more than 1, the cost will be divided. According to "cask effect", pick the cost
+   * of a replica which has maximum value as the cost of the multi-replica.
+   * The difference between this and the one in CostModel,is that, here, we provide additional info of whether this
+   * strategy is a balance one. The result will be returned in form of pair (Boolean, BigDecimal), where the first
+   * element indicate the balance info and the second is the cost of this strategy.
+   * This is cost of using our (heterogeneous) method, regardless of load balance factor.
+   *
+   * @param multiReplicas, the multi-replica strategy
+   * @param queries,       the workload
+   * @return a pair, (Boolean, BigDecimal), the first element indicate the balance info and the second
+   * is the cost of this strategy.
+   */
+//  private Pair<Boolean, BigDecimal> cost(MultiReplicas multiReplicas, Query[] queries) {
+//    Map<Replica, BigDecimal> ans = new HashMap<>();
+//    for (Replica r : multiReplicas.getReplicas().keySet())
+//      ans.put(r, new BigDecimal("0"));
+//    for (Query q : queries) {
+//      Pair<Replica, BigDecimal> costPair = CostModel.cost(multiReplicas, q);
+//      BigDecimal cost = ans.get(costPair.getKey()).add(costPair.getValue());
+//      ans.put(costPair.getKey(), cost);
+//    }
+//    for (Replica r : ans.keySet()) {
+//      int replicaNumber = multiReplicas.getReplicas().get(r);
+//      if (replicaNumber != 1) {
+//        ans.put(r, ans.get(r).divide(BigDecimal.valueOf(replicaNumber),
+//                100, BigDecimal.ROUND_HALF_UP));
+//      }
+//    }
+//    BigDecimal res = null;
+//    for (BigDecimal n : ans.values())
+//      if (res == null || res.compareTo(n) < 0)
+//        res = n;
+//    BigDecimal min = null;
+//    BigDecimal max = null;
+//    for (BigDecimal n : ans.values()) {
+//      if (min == null || min.compareTo(n) > 0) min = n;
+//      if (max == null || max.compareTo(n) < 0) max = n;
+//    }
+//    boolean isBalance = min.multiply(BigDecimal.valueOf(1 + skewFactor))
+//            .compareTo(max) >= 0;
+//    return new Pair<>(isBalance, res);
+//  }
+  private Pair<Boolean, BigDecimal> cost(MultiReplicas multiReplicas, Query[] queries, boolean isNewMethod) {
+    Replica[] replicas = multiReplicas.getReplicasArray(true);
+    BigDecimal[] costs = new BigDecimal[replicas.length];
+    for (int i = 0; i < costs.length; i++) costs[i] = new BigDecimal("0");
+    for (Query q : queries) {
+      int[] indexes = getLeastCostConfOrder(replicas, q);
+      for (int idx : indexes) {
+        Replica replica = replicas[idx];
+        BigDecimal cost = CostModel.cost(replica, q)
+                .multiply(BigDecimal.valueOf(q.getWeight()))
+                .divide(BigDecimal.valueOf(loadBalanceFactor), 100, BigDecimal.ROUND_HALF_UP);
+        costs[idx] = costs[idx].add(cost);
       }
     }
+    Integer[] indexes = new Integer[costs.length];
+    for (int i = 0; i < indexes.length; i++) indexes[i] = i;
+    Arrays.sort(indexes, Comparator.comparing(o -> costs[o]));
+    BigDecimal min = costs[indexes[0]];
+    BigDecimal max = costs[indexes[indexes.length - 1]];
+    boolean isBalance = min.multiply(BigDecimal.valueOf(1 + skewFactor))
+            .compareTo(max) >= 0;
 
-    BigDecimal res = null;
-    for (BigDecimal n : ans.values()) {
-      if (res == null || res.compareTo(n) < 0)
-        res = n;
+    if (isNewMethod) {
+      return new Pair<>(isBalance, max);
+    } else {
+      BigDecimal sum = new BigDecimal("0");
+      for (int i = 0; i < costs.length; i++) sum = sum.add(costs[i]);
+      return new Pair<>(isBalance, sum);
     }
 
-    BigDecimal min = null;
-    BigDecimal max = null;
-    for (BigDecimal n : ans.values()) {
-      if (min == null || min.compareTo(n) > 0) min = n;
-      if (max == null || max.compareTo(n) < 0) max = n;
-    }
-
-//    System.out.println(min.toString());
-    boolean isBalance = min.multiply(BigDecimal.valueOf(1 + skewFactor)).compareTo(max) >= 0;
-    return new Pair<>(isBalance, res);
   }
+
+//  private Pair<Boolean, BigDecimal> cost(MultiReplicas multiReplicas, Query[] queries) {
+//    Replica[] replicas = multiReplicas.getReplicasArray(true);
+//    BigDecimal[] costs = new BigDecimal[replicas.length];
+//    for (int i = 0; i < costs.length; i++) costs[i] = new BigDecimal("0");
+//    for (Query q : queries) {
+//      int[] indexes = getLeastCostConfOrder(replicas, q);
+//      for (int idx : indexes) {
+//        Replica replica = replicas[idx];
+//        BigDecimal cost = CostModel.cost(replica, q)
+//                .multiply(BigDecimal.valueOf(q.getWeight()))
+//                .divide(BigDecimal.valueOf(loadBalanceFactor), 100, BigDecimal.ROUND_HALF_UP);
+//        costs[idx] = costs[idx].add(cost);
+//      }
+//    }
+//    Integer[] indexes = new Integer[costs.length];
+//    for (int i = 0; i < indexes.length; i++) indexes[i] = i;
+//    Arrays.sort(indexes, Comparator.comparing(o -> costs[o]));
+//    BigDecimal min = costs[indexes[0]];
+//    BigDecimal max = costs[indexes[indexes.length - 1]];
+//    boolean isBalance = min.multiply(BigDecimal.valueOf(1 + skewFactor))
+//            .compareTo(max) >= 0;
+//    return new Pair<>(isBalance, max);
+//  }
+
+
+  /**
+   * Input a group of replicas, calculate cost of evaluating given query on each replica,
+   * and output the m-cost-least order of replicas. The length of the output equals to
+   * load balancing factor.
+   *
+   * @param replicas, the candidate replicas
+   * @param query,    the query need to evaluate
+   * @return order of m-cost-least replicas
+   */
+  private int[] getLeastCostConfOrder(Replica[] replicas, Query query) {
+    Integer[] order = new Integer[replicaNumber];
+    for (int i = 0; i < order.length; i++) order[i] = i;
+    BigDecimal[] costs = new BigDecimal[replicaNumber];
+    for (int i = 0; i < costs.length; i++)
+      costs[i] = CostModel.cost(replicas[i], query);
+    Arrays.sort(order, Comparator.comparing(o -> costs[o]));
+    List<Integer> candidates = new ArrayList<>();
+    for (int i = 0; i < candidateBalanceFactor; i++) candidates.add(order[i]);
+    Collections.shuffle(candidates);
+    int[] res = new int[loadBalanceFactor];
+    for (int i = 0; i < res.length; i++) res[i] = candidates.get(i);
+    return res;
+  }
+
+
+//  public static BigDecimal cost(MultiReplicas multiReplicas, Query[] queries) {
+//
+//    for (Query q : queries) {
+//
+//
+//    }
+//  }
 }
