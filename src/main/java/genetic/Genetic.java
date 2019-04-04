@@ -97,14 +97,15 @@ public class Genetic {
    * @return the optimal multi-replica
    * @throws NoSuchAlgorithmException
    */
-  public MultiReplicas optimal() throws NoSuchAlgorithmException { // TODO private
+  public MultiReplicas optimal() throws NoSuchAlgorithmException {
     // initialize the populationSize, a group of multi-replicas / solutions
     MultiReplicas[] curPopulation = init();
     int curIteration = 0;
-    while (!isTerminate(curIteration, curPopulation)) {
+    while (true) {
       System.out.println(curIteration); // TODO
       // pick and copy
       curPopulation = copy(curPopulation);
+      if(isTerminate(curIteration, curPopulation)) break;
       // crossover
       curPopulation = crossover(curPopulation);
       // mutation
@@ -122,7 +123,7 @@ public class Genetic {
    * @param population the population, a lot of multi-replicas
    * @return the picked new generation
    */
-  public MultiReplicas[] copy(MultiReplicas[] population) throws NoSuchAlgorithmException {// TODO private
+  private MultiReplicas[] copy(MultiReplicas[] population) throws NoSuchAlgorithmException {
     Random random = SecureRandom.getInstanceStrong();
     BigDecimal[] fitArr = fit(population);
     BigDecimal total = new BigDecimal(0);
@@ -154,7 +155,7 @@ public class Genetic {
    * @param m2 one of the parents (multi-replica)
    * @return a pair, two children
    */
-  public Pair<MultiReplicas, MultiReplicas> crossover(MultiReplicas m1, MultiReplicas m2)// TODO private
+  private Pair<MultiReplicas, MultiReplicas> crossover(MultiReplicas m1, MultiReplicas m2)
           throws NoSuchAlgorithmException {
     if (m1.getReplicaNum() != m2.getReplicaNum())
       throw new IllegalArgumentException("Replica numbers are inconsistent");
@@ -185,7 +186,7 @@ public class Genetic {
    * @param population original population
    * @return population after crossover
    */
-  public MultiReplicas[] crossover(MultiReplicas[] population)// TODO private
+  private MultiReplicas[] crossover(MultiReplicas[] population)
           throws NoSuchAlgorithmException {
     List<MultiReplicas> list = new ArrayList<>();
     Collections.addAll(list, population);
@@ -208,7 +209,7 @@ public class Genetic {
    * @param population the original generation
    * @return the generation after mutation
    */
-  public MultiReplicas[] mutate(MultiReplicas[] population) throws NoSuchAlgorithmException {// TODO private
+  private MultiReplicas[] mutate(MultiReplicas[] population) throws NoSuchAlgorithmException {
     int number = (int) (population.length * replicaNumber * mutationRate);
     if(number == 0) return population;
     Integer[] mutateIdx = generateRandomArray(0, population.length, number);
@@ -225,7 +226,7 @@ public class Genetic {
    * @param multiReplicas original individual (multi-replica)
    * @return new individual (multi-replica)
    */
-  public MultiReplicas mutate(MultiReplicas multiReplicas) throws NoSuchAlgorithmException {// TODO private
+  private MultiReplicas mutate(MultiReplicas multiReplicas) throws NoSuchAlgorithmException {
     Replica[] rs = multiReplicas.getReplicasArray(true);
     Integer[] mutateIdx = generateRandomArray(0, multiReplicas.getReplicaNum(), geneChangeNum);
     for (int i = 0; i < mutateIdx.length; i++)
@@ -245,7 +246,7 @@ public class Genetic {
    * @param len,      length of returned array.
    * @return
    */
-  public Integer[] generateRandomArray(int min, int rangeLen, int len) {// TODO private
+  private Integer[] generateRandomArray(int min, int rangeLen, int len) {
     if (rangeLen <= 0 || len <= 0 || len > rangeLen)
       throw new IllegalArgumentException();
     List<Integer> ls = new ArrayList<>();
@@ -263,7 +264,7 @@ public class Genetic {
    *
    * @return the initialized population/multi-replicas
    */
-  public MultiReplicas[] init() {// TODO private
+  private MultiReplicas[] init() {
     MultiReplicas[] multiReplicas = new MultiReplicas[populationSize];
     for (int i = 0; i < multiReplicas.length; i++)
       multiReplicas[i] = initRandomMultiReplicas();
@@ -275,7 +276,7 @@ public class Genetic {
    *
    * @return the initialized individual/multi-replicas
    */
-  public MultiReplicas initRandomMultiReplicas() {// TODO private
+  private MultiReplicas initRandomMultiReplicas() {
     MultiReplicas newMultiReplica = new MultiReplicas();
     for (int i = 0; i < replicaNumber; i++)
       newMultiReplica.add(new Replica(dataTable, ArrayTransform.random(dataTable.getColNum())));
@@ -288,7 +289,7 @@ public class Genetic {
    * @param curPopulation a population/a group multi-replicas
    * @return the array of fitness, each element corresponding to the individual in input array
    */
-  public BigDecimal[] fit(MultiReplicas[] curPopulation) {// TODO private
+  private BigDecimal[] fit(MultiReplicas[] curPopulation) {
     BigDecimal[] ans = new BigDecimal[curPopulation.length];
     if (isNewMethod)
       for (int i = 0; i < ans.length; i++)
@@ -311,9 +312,9 @@ public class Genetic {
    * @param curPopulation    current population / a group of multi-replicas
    * @return true if to terminate, false not to terminate
    */
-  public boolean isTerminate(int currentIteration, MultiReplicas[] curPopulation) {// TODO private
+  private boolean isTerminate(int currentIteration, MultiReplicas[] curPopulation) {
     // if less than minIteration, return false
-    if (currentIteration < minIteration) return false;
+//    if (currentIteration < minIteration) return false; // TODO
     // analyze
     Map<MultiReplicas, Integer> counter = new HashMap<>();
     for (int i = 0; i < curPopulation.length; i++) {
@@ -330,6 +331,8 @@ public class Genetic {
         m = en.getKey();
       }
     }
+    System.out.println(CostModel.cost(m, queries) + " " + n);
+    if (currentIteration < minIteration) return false;// TODO
     if (currentIteration == maxIteration) {
       multiReplicas = m;
       return true;
@@ -394,45 +397,5 @@ public class Genetic {
 
   public Query[] getQueries() {
     return queries;
-  }
-
-  public int getPopulationSize() {
-    return populationSize;
-  }
-
-  public int getMaxIteration() {
-    return maxIteration;
-  }
-
-  public int getMinIteration() {
-    return minIteration;
-  }
-
-  public boolean isNewMethod() {
-    return isNewMethod;
-  }
-
-  public double getCrossoverRate() {
-    return crossoverRate;
-  }
-
-  public double getMutationRate() {
-    return mutationRate;
-  }
-
-  public int getGeneChangeNum() {
-    return geneChangeNum;
-  }
-
-  public int getReplicaNumber() {
-    return replicaNumber;
-  }
-
-  public double getEqualRateThreshold() {
-    return equalRateThreshold;
-  }
-
-  public MultiReplicas getMultiReplicas() {
-    return multiReplicas;
   }
 }
