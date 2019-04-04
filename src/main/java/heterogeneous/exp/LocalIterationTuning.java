@@ -33,7 +33,7 @@ public class LocalIterationTuning {
     FileWriter fw = new FileWriter(f, true);
     for (int i = minIt; i <= maxIt; i++) {
       Constant.LOCAL_ITERATION_NUM = i;
-      SimulateAnneal sa = new SimulateAnneal(dataTable, queries, 3);
+      SimulateAnneal sa = new SimulateAnneal(dataTable, queries, 3, true);
       fw.write(sa.optimal().getOrderString() + i + "\n");
     }
     fw.close();

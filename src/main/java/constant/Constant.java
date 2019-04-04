@@ -31,5 +31,13 @@ public class Constant {
   public static double SKEW_FACTOR = 0.5;
   public static boolean IS_NEW_METHOD = false;
 
+  //GA
+  public static int GA_MAX_ITERATION = 1000;
+  public static int GA_MIN_ITERATION = 40;
+  public static int POPULATION = 100;
+  public static double CROSSOVER_RATE = 0.5;
+  public static double MUTATION_RATE = 0.0001;
+  public static int GENE_CHANGE_NUMBER = 1;
+
 
 }

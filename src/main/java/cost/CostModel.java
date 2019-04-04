@@ -116,7 +116,11 @@ public class CostModel {
     return res;
   }
 
-
-
+  public static BigDecimal totalCost(MultiReplicas multiReplicas, Query[] queries){
+    BigDecimal ans = new BigDecimal("0");
+    for (Query q : queries)
+      ans = ans.add(cost(multiReplicas, q).getValue());
+    return ans;
+  }
 
 }

@@ -26,6 +26,7 @@ public class SimulateAnneal {
   private double temperature;
   private int iteration = 0;
   private int optimalCnt = 0;
+  private boolean isNewMethod = true;
 
   // the solution
   private MultiReplicas multiReplicas = null;
@@ -51,10 +52,11 @@ public class SimulateAnneal {
    * @param queries,       workload
    * @param replicaNumber, number of replica
    */
-  public SimulateAnneal(DataTable dataTable, Query[] queries, int replicaNumber) {
+  public SimulateAnneal(DataTable dataTable, Query[] queries, int replicaNumber, boolean isNewMethod) {
     this.data = dataTable;
     this.queries = queries;
     this.replicaNumber = replicaNumber;
+    this.isNewMethod = isNewMethod;
   }
 
 
@@ -81,9 +83,12 @@ public class SimulateAnneal {
    */
   public MultiReplicas optimal() throws NoSuchAlgorithmException {
     initTemperature();
-    if(multiReplicas == null)
+    if (multiReplicas == null)
       multiReplicas = initSolutionByOptimalReplica();
-    optimalCost = CostModel.cost(multiReplicas, queries);
+    if (isNewMethod)
+      optimalCost = CostModel.cost(multiReplicas, queries);
+    else
+      optimalCost = CostModel.totalCost(multiReplicas, queries);
     costHistory.add(optimalCost.doubleValue());
     while (!isGlobalConverge()) {
 //      System.out.println(">>>>>>>t: " + temperature);
@@ -92,7 +97,11 @@ public class SimulateAnneal {
       while (!isLocalConverge()) {
         // generate new solution
         MultiReplicas newMultiReplica = generateNewMultiReplica(curMultiReplica);
-        BigDecimal newCost = CostModel.cost(newMultiReplica, queries);
+        BigDecimal newCost;
+        if (isNewMethod)
+          newCost = CostModel.cost(newMultiReplica, queries);
+        else
+          newCost = CostModel.totalCost(newMultiReplica, queries);
         if (isChosen(newCost, curCost)) {
           curMultiReplica = newMultiReplica;
           curCost = newCost;
@@ -235,8 +244,12 @@ public class SimulateAnneal {
     BigDecimal max = null;
     BigDecimal min = null;
     for (int i = 0; i < 20; i++) {
-      m = initSolutioRandom();
-      BigDecimal curCost = CostModel.cost(m, queries);
+      m = initSolutionRandom();
+      BigDecimal curCost;
+      if (isNewMethod)
+        curCost = CostModel.cost(m, queries);
+      else
+        curCost = CostModel.totalCost(m,queries);
       if (max == null || max.compareTo(curCost) < 0) max = curCost;
       if (min == null || min.compareTo(curCost) > 0) min = curCost;
     }
@@ -248,7 +261,7 @@ public class SimulateAnneal {
             .doubleValue();
   }
 
-  public SimulateAnneal initSolution(Replica r){
+  public SimulateAnneal initSolution(Replica r) {
     multiReplicas = new MultiReplicas();
     for (int i = 0; i < replicaNumber; i++)
       multiReplicas.add(new Replica(r));
@@ -262,13 +275,13 @@ public class SimulateAnneal {
    */
   private MultiReplicas initSolutionByOptimalReplica() {
     MultiReplicas newMultiReplica = new MultiReplicas();
-    Replica r =  new SearchAll(data, queries).optimalReplica();
+    Replica r = new SearchAll(data, queries).optimalReplica();
     for (int i = 0; i < replicaNumber; i++)
       newMultiReplica.add(new Replica(r));
     return newMultiReplica;
   }
 
-  private MultiReplicas initSolutioRandom(){
+  private MultiReplicas initSolutionRandom() {
     MultiReplicas newMultiReplica = new MultiReplicas();
     for (int i = 0; i < replicaNumber; i++)
       newMultiReplica.add(new Replica(data, ArrayTransform.random(data.getColNum())));

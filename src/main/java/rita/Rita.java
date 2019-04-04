@@ -53,7 +53,6 @@ public class Rita {
     else candidateBalanceFactor = loadBalanceFactor + 1;
   }
 
-
   /**
    * @param dataTable              info of the table
    * @param queries                info of the workload

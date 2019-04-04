@@ -57,7 +57,7 @@ public class MultiReplicas {
           ans[cnt++] = new Replica(en.getKey());
       return ans;
     }else{
-      return replicas.keySet().toArray(new Replica [0]);
+      return replicas.keySet().toArray(new Replica [0]).clone();
     }
   }
 

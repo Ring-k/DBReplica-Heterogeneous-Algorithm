@@ -22,7 +22,7 @@ public class HeterogeneousDemo {
     DataTable dataTable = getDataTable(5);
     Query[] queries = getQueries(5);
 
-    SimulateAnneal sa = new SimulateAnneal(dataTable, queries, 3);
+    SimulateAnneal sa = new SimulateAnneal(dataTable, queries, 3, true);
     Constant.LOCAL_ITERATION_NUM = 12;
     MultiReplicas m = sa.optimal();
     System.out.println(m.getOrderString());

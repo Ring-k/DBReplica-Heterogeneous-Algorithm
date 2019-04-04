@@ -118,7 +118,7 @@ public class Comparison {
 
       Replica replica = new SearchAll(dataTable, queries).optimalReplica();
 
-      SimulateAnneal sa = new SimulateAnneal(dataTable, queries, 3).initSolution(replica);
+      SimulateAnneal sa = new SimulateAnneal(dataTable, queries, 3, true).initSolution(replica);
       double cost = CostModel.cost(sa.optimal(), queries).doubleValue();
       String line = "SA: " + i + "," + cost + "\n";
       String record = "" + cost;
@@ -215,6 +215,7 @@ public class Comparison {
       record += ("," + cost + "\n");
 
       System.out.println(line);
+      fw.write(record);
 
 
     }

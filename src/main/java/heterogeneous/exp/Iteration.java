@@ -43,7 +43,7 @@ public class Iteration {
       for (int j = minIt; j <= maxIt; j+=itStep) {
         Constant.OPTIMAL_COUNT_THRESHOLD = i;
         Constant.LOCAL_ITERATION_NUM = j;
-        SimulateAnneal sa = new SimulateAnneal(dataTable, queries, 3).initSolution(initReplica);
+        SimulateAnneal sa = new SimulateAnneal(dataTable, queries, 3, true).initSolution(initReplica);
         sa.optimal();
         String line = "";
         line += i + "," + j + "," + sa.getOptimalCost() / cost.doubleValue() + "\n";

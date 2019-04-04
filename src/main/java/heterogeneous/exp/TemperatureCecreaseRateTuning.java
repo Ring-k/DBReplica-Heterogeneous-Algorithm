@@ -29,7 +29,7 @@ public class TemperatureCecreaseRateTuning {
 
     for (double i = minRate; i <= maxRate; i += 0.01) {
       Constant.TEMPERATURE_DECREASE_RATE = i;
-      SimulateAnneal sa = new SimulateAnneal(dataTable, queries, 3);
+      SimulateAnneal sa = new SimulateAnneal(dataTable, queries, 3, true);
       long start = System.currentTimeMillis();
       MultiReplicas m = sa.optimal();
       long time = System.currentTimeMillis() - start;
