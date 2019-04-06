@@ -3,9 +3,11 @@ import cost.CostModel;
 import datamodel.DataTable;
 import datamodel.Histogram;
 import divergentdesign.DivgDesign;
+import genetic.Genetic;
 import heterogeneous.SimulateAnneal;
 import query.Query;
 import query.QueryGenerator;
+import replica.MultiReplicas;
 import replica.Replica;
 import rita.Rita;
 import searchall.SearchAll;
@@ -214,6 +216,10 @@ public class Comparison {
       line += "RITA, load balance = 3, candidate factor = 3, skew = 0.5, isNewMethod = true, " + cost + "\n";
       record += ("," + cost + "\n");
 
+
+      Genetic g = new Genetic(dataTable, queries, 3, 100, 50, 20000, 0.8, 0.01, 1, true);
+      MultiReplicas multiReplicas = g.optimal();
+
       System.out.println(line);
       fw.write(record);
 
@@ -228,7 +234,7 @@ public class Comparison {
 //    int maxCol = Integer.parseInt(args[1]);
 //    generateDataAndQueries(minCol, maxCol);
 //    writeSolutions("compare\\solutions.txt", 1, 10);
-    for(int i = 0; i < 1000; i++)
-    compare("comp.csv", 7, 7);
+    for (int i = 0; i < 1000; i++)
+      compare("comp.csv", 7, 7);
   }
 }
