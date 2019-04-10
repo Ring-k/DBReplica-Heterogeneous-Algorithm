@@ -105,7 +105,7 @@ public class Genetic {
       System.out.println(curIteration); // TODO
       // pick and copy
       curPopulation = copy(curPopulation);
-      if(isTerminate(curIteration, curPopulation)) break;
+      if (isTerminate(curIteration, curPopulation)) break;
       // crossover
       curPopulation = crossover(curPopulation);
       // mutation
@@ -137,11 +137,11 @@ public class Genetic {
       double v = random.nextDouble();
       for (int j = prob.length - 1; j >= 0; j--) {
         if (v >= prob[j]) {
-          nextGeneration[i] = new MultiReplicas(population[j+1]);
+          nextGeneration[i] = new MultiReplicas(population[j + 1]);
           break;
         }
       }
-      if(nextGeneration[i] == null) nextGeneration[i] = new MultiReplicas(population[0]);
+      if (nextGeneration[i] == null) nextGeneration[i] = new MultiReplicas(population[0]);
     }
     return nextGeneration;
   }
@@ -211,7 +211,7 @@ public class Genetic {
    */
   private MultiReplicas[] mutate(MultiReplicas[] population) throws NoSuchAlgorithmException {
     int number = (int) (population.length * replicaNumber * mutationRate);
-    if(number == 0) return population;
+    if (number == 0) return population;
     Integer[] mutateIdx = generateRandomArray(0, population.length, number);
     for (int i = 0; i < mutateIdx.length; i++)
       population[mutateIdx[i]] = mutate(population[mutateIdx[i]]);
@@ -291,6 +291,8 @@ public class Genetic {
    */
   private BigDecimal[] fit(MultiReplicas[] curPopulation) {
     BigDecimal[] ans = new BigDecimal[curPopulation.length];
+    BigDecimal max = null;
+
     if (isNewMethod)
       for (int i = 0; i < ans.length; i++)
         ans[i] = BigDecimal.valueOf(1)
@@ -299,6 +301,35 @@ public class Genetic {
       for (int i = 0; i < ans.length; i++)
         ans[i] = BigDecimal.valueOf(1)
                 .divide(CostModel.totalCost(curPopulation[i], queries), 1000, BigDecimal.ROUND_HALF_UP);
+
+
+//    if (isNewMethod) {
+//      for (int i = 0; i < ans.length; i++) {
+//        ans[i] = BigDecimal.valueOf(1)
+//                .divide(CostModel.cost(curPopulation[i], queries), 1000, BigDecimal.ROUND_HALF_UP);
+//        if(max == null || max.compareTo(ans[i]) < 0)
+//          max = new BigDecimal(ans[i].toString());
+//      }
+//    }
+//    else {
+//      for (int i = 0; i < ans.length; i++) {
+//        ans[i] = BigDecimal.valueOf(1)
+//                .divide(CostModel.totalCost(curPopulation[i], queries), 1000, BigDecimal.ROUND_HALF_UP);
+//        if(max == null || max.compareTo(ans[i]) < 0)
+//          max = new BigDecimal(ans[i].toString());
+//      }
+//    }
+//    for(int i = 0; i < ans.length; i++) {
+//      ans[i] = ans[i].divide(max, 1000, BigDecimal.ROUND_HALF_UP);
+////      System.out.println(ans[i].toString());
+//      double d = ans[i].doubleValue();
+//      d = 1 / (1 + Math.pow(2,- 8 * (d-0.5)));
+//      ans[i] = BigDecimal.valueOf(d);
+//    }
+
+
+
+
     return ans;
   }
 

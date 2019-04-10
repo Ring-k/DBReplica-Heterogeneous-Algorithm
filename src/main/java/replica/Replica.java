@@ -46,6 +46,14 @@ public class Replica {
       throw new IllegalArgumentException();
     Query afterOrder = query.getQuery(order);
     double res = 1.0;
+
+    if(afterOrder.getRangeColIndex() == -1){
+      for(int i = 0; i < dataTable.getColNum(); i++)
+        res *= res *= dataTable.getColHistograms()[i]
+                .getProbability(((PointQuery)afterOrder.getMiniQueries()[i]).getValue());
+      return res;
+    }
+
     for (int i = 0; i < afterOrder.getRangeColIndex(); i++)
       res *= dataTable.getColHistograms()[i]
               .getProbability(((PointQuery)afterOrder.getMiniQueries()[i]).getValue());
@@ -70,9 +78,6 @@ public class Replica {
     return dataTable.getRowNum().multiply(BigDecimal.valueOf(scanProbability(query)));
   }
 
-//  public BigDecimal resultRows(Query query) {
-//    return dataTable.getRowNum().multiply(BigDecimal.valueOf(resultProbability(query)));
-//  }
 
   @Override
   public String toString() {

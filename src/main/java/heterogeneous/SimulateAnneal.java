@@ -91,7 +91,6 @@ public class SimulateAnneal {
       optimalCost = CostModel.totalCost(multiReplicas, queries);
     costHistory.add(optimalCost.doubleValue());
     while (!isGlobalConverge()) {
-//      System.out.println(">>>>>>>t: " + temperature);
       MultiReplicas curMultiReplica = new MultiReplicas(multiReplicas);
       BigDecimal curCost = optimalCost;
       while (!isLocalConverge()) {
@@ -105,13 +104,6 @@ public class SimulateAnneal {
         if (isChosen(newCost, curCost)) {
           curMultiReplica = newMultiReplica;
           curCost = newCost;
-//          System.out.println("iteration" + iteration + ": "
-//                  + curCost.setScale(2, BigDecimal.ROUND_HALF_UP)
-//                  + ", " + curMultiReplica.getOrderString());
-        } else {
-//          System.out.println("iteration" + iteration + ": "
-//                  + newCost.setScale(2, BigDecimal.ROUND_HALF_UP)
-//                  + ", " + newMultiReplica.getOrderString() + " drop");
         }
         costHistory.add(curCost.doubleValue());
         iteration++;
@@ -249,7 +241,7 @@ public class SimulateAnneal {
       if (isNewMethod)
         curCost = CostModel.cost(m, queries);
       else
-        curCost = CostModel.totalCost(m,queries);
+        curCost = CostModel.totalCost(m, queries);
       if (max == null || max.compareTo(curCost) < 0) max = curCost;
       if (min == null || min.compareTo(curCost) > 0) min = curCost;
     }

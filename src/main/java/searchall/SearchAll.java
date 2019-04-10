@@ -57,7 +57,6 @@ public class SearchAll {
     for(int[] i : singleReplicas){
       Replica r = new Replica(dataTable, i);
       BigDecimal cost = CostModel.cost(r, queries);
-//      System.out.println(current++ + "/" + all);
       if(optimalCost == null || optimalCost.compareTo(cost) > 0){
         optimalCost = cost;
         ans = r;

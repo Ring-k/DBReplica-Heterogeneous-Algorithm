@@ -116,7 +116,6 @@ public class DivgDesign {
         curCost = CostModel.cost(m, workload).doubleValue();
       else
         curCost = totalCost(multiReplicas);
-      System.out.println(curCost);//TODO
       if (isIterationTerminate(it, curCost)) break;
       optimalCost = curCost;
       history.add(optimalCost);
@@ -133,7 +132,6 @@ public class DivgDesign {
       }
       System.arraycopy(curSubQueries, 0, workloadSubsets, 0, replicaNum);
     }
-    System.out.println();//TODO
     optimalCost = curCost;
     history.add(optimalCost);
     MultiReplicas res = new MultiReplicas();

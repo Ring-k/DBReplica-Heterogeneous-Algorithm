@@ -24,7 +24,7 @@ public class GeneticDemo {
     DataTable dataTable = getDataTable(7);
     Query[] queries = getQueries(7);
     Genetic g = new Genetic(dataTable, queries, 3,
-            100, 50, 20000,
+            150, 50, 20000,
             0.8, 0.01, 1, true);
     MultiReplicas multiReplicas = g.optimal();
     System.out.println(CostModel.cost(multiReplicas, queries));
