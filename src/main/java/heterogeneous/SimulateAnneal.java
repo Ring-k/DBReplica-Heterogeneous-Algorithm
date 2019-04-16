@@ -2,6 +2,7 @@ package heterogeneous;
 
 import constant.Constant;
 import cost.CostModel;
+import cost.QueryAnalysis;
 import datamodel.DataTable;
 import query.Query;
 import replica.MultiReplicas;
@@ -11,10 +12,7 @@ import searchall.SearchAll;
 import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 
 public class SimulateAnneal {
@@ -90,6 +88,7 @@ public class SimulateAnneal {
     else
       optimalCost = CostModel.totalCost(multiReplicas, queries);
     costHistory.add(optimalCost.doubleValue());
+    CostModel.analysisEachReplica(multiReplicas, queries);// TODO print something here
     while (!isGlobalConverge()) {
       MultiReplicas curMultiReplica = new MultiReplicas(multiReplicas);
       BigDecimal curCost = optimalCost;
@@ -105,12 +104,14 @@ public class SimulateAnneal {
           curMultiReplica = newMultiReplica;
           curCost = newCost;
         }
+        CostModel.analysisEachReplica(curMultiReplica, queries);//TODO print something here
         costHistory.add(curCost.doubleValue());
         iteration++;
       }
       iteration = 0;
       if (curCost.compareTo(optimalCost) < 0) {
         multiReplicas = new MultiReplicas(curMultiReplica);
+//        CostModel.analysisEachReplica(curMultiReplica, queries);//TODO print something here
         optimalCost = curCost;
         optimalCnt = 0;
       } else {
@@ -253,10 +254,54 @@ public class SimulateAnneal {
             .doubleValue();
   }
 
+  /**
+   * Use a replica to initialize SA solution. The initial multi-replica contains multiple
+   * replication of the given replica
+   *
+   * @param r a replica
+   */
   public SimulateAnneal initSolution(Replica r) {
     multiReplicas = new MultiReplicas();
     for (int i = 0; i < replicaNumber; i++)
       multiReplicas.add(new Replica(r));
+    return this;
+  }
+
+  public SimulateAnneal initSolution() {
+    int[] order = QueryAnalysis.getRangeQueryNumberOrder(queries);
+    Set<Integer>[] replicaOrders = new HashSet[replicaNumber];
+    for (int i = 0; i < replicaOrders.length; i++) {
+      replicaOrders[i] = new HashSet<>();
+      for (int j = 0; j < data.getColNum(); j++) replicaOrders[i].add(j);
+    }
+    int[][] replicaOrdersArr = new int[replicaNumber][];
+    for (int i = 0; i < replicaOrdersArr.length; i++) {
+      replicaOrdersArr[i] = new int[data.getColNum()];
+      for (int j = 0; j < replicaOrdersArr[i].length; j++)
+        replicaOrdersArr[i][j] = -1;
+    }
+    int orderIndex = 0;
+    for (int i = data.getColNum() - 1; i >= 0; i--) {
+      for (int j = 0; j < replicaNumber; j++) {
+        if (orderIndex >= data.getColNum()) break;
+        replicaOrdersArr[j][i] = order[orderIndex];
+        replicaOrders[j].remove(order[orderIndex]);
+        orderIndex++;
+      }
+      if (orderIndex >= data.getColNum()) break;
+    }
+    for (int i = 0; i < replicaNumber; i++) {
+      Integer[] its = replicaOrders[i].toArray(new Integer[0]);
+      List<Integer> lint = new ArrayList<>();
+      Collections.addAll(lint, its);
+      Collections.shuffle(lint);
+      for (int j = 0; j < lint.size(); j++) replicaOrdersArr[i][j] = lint.get(j);
+    }
+    multiReplicas = new MultiReplicas();
+    for (int i = 0; i < replicaOrdersArr.length; i++) {
+      Replica r = new Replica(data, replicaOrdersArr[i]);
+      multiReplicas.add(r);
+    }
     return this;
   }
 
@@ -308,6 +353,11 @@ public class SimulateAnneal {
    */
   public List<Double> getHistory() {
     return costHistory;
+  }
+
+  @Deprecated
+  public MultiReplicas getMultiReplicas() {
+    return multiReplicas;
   }
 
 }

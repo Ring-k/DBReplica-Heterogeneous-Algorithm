@@ -1,4 +1,5 @@
 import cost.CostModel;
+import dataloader.DataLoader;
 import datamodel.DataTable;
 import divergentdesign.DivgDesign;
 import genetic.Genetic;
@@ -13,25 +14,13 @@ import java.security.NoSuchAlgorithmException;
 
 public class CompNew {
 
-  static Query[] getQueries() throws IOException, ClassNotFoundException {
-    ObjectInputStream ois = new ObjectInputStream(new FileInputStream("data\\queries"));
-//    ObjectInputStream ois = new ObjectInputStream(new FileInputStream("queries"));
-    return (Query[]) ois.readObject();
-  }
-
-  static DataTable getDataTable() throws IOException, ClassNotFoundException {
-    ObjectInputStream ois = new ObjectInputStream(new FileInputStream("data\\data_table"));
-//    ObjectInputStream ois = new ObjectInputStream(new FileInputStream("data_table"));
-    return (DataTable) ois.readObject();
-  }
-
   public static void SAExp(DataTable dataTable, Query[] queries, boolean isNewMethod) throws IOException, NoSuchAlgorithmException {
 //    File f = new File("simulateanneal.out");
     File f = new File("data\\out\\sa.out");
     if (!f.exists()) f.createNewFile();
     FileWriter fw = new FileWriter(f, true);
     Replica replica = new SearchAll(dataTable, queries).optimalReplica();
-    SimulateAnneal sa = new SimulateAnneal(dataTable, queries, 3, isNewMethod).initSolution(replica);
+    SimulateAnneal sa = new SimulateAnneal(dataTable, queries, 3, isNewMethod).initSolution();
     MultiReplicas m = sa.optimal();
     double cost = sa.getOptimalCost();
     String out = "SA:{"
@@ -127,35 +116,35 @@ public class CompNew {
 
 
   public static void main(String args[]) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
-    DataTable dataTable = getDataTable();
-    Query[] queries = getQueries();
+    DataTable dataTable = DataLoader.getDataTable();
+    Query[] queries = DataLoader.getQueries();
     int expTimes = 10;
     for(int i = 0;i < expTimes ; i++){
       System.out.println("turn " + i + ": ");
       SAExp(dataTable, queries, true);
       System.out.println("simulate anneal true finished");
-      SAExp(dataTable, queries, false);
-      System.out.println("simulate anneal false finished");
-      DivgExp(dataTable, queries, 1, true);
-      System.out.println("divergent m=1 true finished");
-      DivgExp(dataTable, queries, 2, true);
-      System.out.println("divergent m=2 true finished");
-      DivgExp(dataTable, queries, 3, true);
-      System.out.println("divergent m=3 true finished");
-      DivgExp(dataTable, queries, 1, false);
-      System.out.println("divergent m=1 false finished");
-      DivgExp(dataTable, queries, 2, false);
-      System.out.println("divergent m=2 false finished");
-      DivgExp(dataTable, queries, 3, false);
-      System.out.println("divergent m=3 false finished");
-      SearchAllExp(dataTable, queries, true);
-      System.out.println("search all true finished");
-      SearchAllExp(dataTable, queries, false);
-      System.out.println("search all false finished");
-      GeneticExp(dataTable, queries, true);
-      System.out.println("genetic true finished");
-      GeneticExp(dataTable, queries, false);
-      System.out.println("genetic false finished");
+//      SAExp(dataTable, queries, false);
+//      System.out.println("simulate anneal false finished");
+//      DivgExp(dataTable, queries, 1, true);
+//      System.out.println("divergent m=1 true finished");
+//      DivgExp(dataTable, queries, 2, true);
+//      System.out.println("divergent m=2 true finished");
+//      DivgExp(dataTable, queries, 3, true);
+//      System.out.println("divergent m=3 true finished");
+//      DivgExp(dataTable, queries, 1, false);
+//      System.out.println("divergent m=1 false finished");
+//      DivgExp(dataTable, queries, 2, false);
+//      System.out.println("divergent m=2 false finished");
+//      DivgExp(dataTable, queries, 3, false);
+//      System.out.println("divergent m=3 false finished");
+//      SearchAllExp(dataTable, queries, true);
+//      System.out.println("search all true finished");
+//      SearchAllExp(dataTable, queries, false);
+//      System.out.println("search all false finished");
+//      GeneticExp(dataTable, queries, true);
+//      System.out.println("genetic true finished");
+//      GeneticExp(dataTable, queries, false);
+//      System.out.println("genetic false finished");
     }
 
   }
