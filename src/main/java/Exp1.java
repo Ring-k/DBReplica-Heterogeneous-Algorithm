@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class Comparison {
+public class Exp1 {
 
   static void generateDataAndQueries(int min, int max) throws NoSuchAlgorithmException {
     for (int i = min; i <= max; i++) {

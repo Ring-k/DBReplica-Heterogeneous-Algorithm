@@ -328,8 +328,6 @@ public class Genetic {
 //    }
 
 
-
-
     return ans;
   }
 

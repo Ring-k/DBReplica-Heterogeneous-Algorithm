@@ -20,6 +20,7 @@ public class GeneticDemo {
     ObjectInputStream ois = new ObjectInputStream(new FileInputStream("data_table_" + colNums));
     return (DataTable) ois.readObject();
   }
+
   public static void main(String args[]) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
     DataTable dataTable = getDataTable(7);
     Query[] queries = getQueries(7);

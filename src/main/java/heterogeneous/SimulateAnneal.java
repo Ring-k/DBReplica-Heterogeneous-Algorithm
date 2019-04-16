@@ -88,7 +88,7 @@ public class SimulateAnneal {
     else
       optimalCost = CostModel.totalCost(multiReplicas, queries);
     costHistory.add(optimalCost.doubleValue());
-    CostModel.analysisEachReplica(multiReplicas, queries);// TODO print something here
+//    CostModel.analysisEachReplica(multiReplicas, queries);// TODO print something here
     while (!isGlobalConverge()) {
       MultiReplicas curMultiReplica = new MultiReplicas(multiReplicas);
       BigDecimal curCost = optimalCost;
@@ -104,7 +104,7 @@ public class SimulateAnneal {
           curMultiReplica = newMultiReplica;
           curCost = newCost;
         }
-        CostModel.analysisEachReplica(curMultiReplica, queries);//TODO print something here
+//        CostModel.analysisEachReplica(curMultiReplica, queries);//TODO print something here
         costHistory.add(curCost.doubleValue());
         iteration++;
       }

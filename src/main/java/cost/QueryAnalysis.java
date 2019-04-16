@@ -31,12 +31,13 @@ public class QueryAnalysis {
       MiniQuery[] miniQueries = q.getMiniQueries();
       for (int i = 0; i < miniQueries.length; i++) {
         if (miniQueries[i] instanceof RangeQuery) {
-          System.out.print(1);
+//          System.out.print(1);
           res[i]++;
-        } else
-          System.out.print(0);
+//        } else {
+//          System.out.print(0);
+        }
       }
-      System.out.println();
+//      System.out.println();
     }
     return res;
   }
