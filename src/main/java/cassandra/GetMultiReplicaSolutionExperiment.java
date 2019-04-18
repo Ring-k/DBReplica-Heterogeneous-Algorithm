@@ -3,7 +3,7 @@ package cassandra;
 import cost.CostModel;
 import dataloader.DataLoader;
 import datamodel.DataTable;
-import divergentdesign.DivgDesign;
+import divergentdesign.DivergentDesign;
 import genetic.Genetic;
 import heterogeneous.SimulateAnneal;
 import query.Query;
@@ -36,7 +36,7 @@ public class GetMultiReplicaSolutionExperiment {
     File f = new File("divg.out");
     if (!f.exists()) f.createNewFile();
     FileWriter fw = new FileWriter(f, true);
-    DivgDesign dd = new DivgDesign(dataTable, queries, 3, m, 1000, 0.0000000000000000000001, false);
+    DivergentDesign dd = new DivergentDesign(dataTable, queries, 3, m, 1000, 0.0000000000000000000001, false);
     MultiReplicas multi = dd.optimal();
     double cost = dd.getOptimalCost();
     String out = "Divg:{" + "isNewMethod:" + isNewMethod + "||" + " m = " + m + "||" + "solution:" + multi.getOrderString() + "||" + "cost:" + cost + "\n";

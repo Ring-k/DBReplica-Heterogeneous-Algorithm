@@ -3,7 +3,6 @@ package divergentdesign;
 import datamodel.DataTable;
 import datamodel.Histogram;
 import query.Query;
-import query.QueryGenerator;
 import replica.MultiReplicas;
 
 import java.io.*;
@@ -36,7 +35,7 @@ public class DivgDesignDemo {
     DataTable dataTable = getDataTable(7);
     Query[] queries = getQueries(7);
 
-    DivgDesign d = new DivgDesign(dataTable, queries);
+    DivergentDesign d = new DivergentDesign(dataTable, queries);
     MultiReplicas m = d.optimal();
     System.out.println(m.getOrderString());
     System.out.println("cost: " + d.getOptimalCost());

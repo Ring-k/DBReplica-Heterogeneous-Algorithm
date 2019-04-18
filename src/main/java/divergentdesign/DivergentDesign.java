@@ -21,7 +21,7 @@ import java.util.*;
  * and current optimalCost and workloadSubsets is consistent with the optimal strategy.
  * Experiments shows that evaluate cost is higher in SA, because we set replica num = 1 in SA here.
  */
-public class DivgDesign {
+public class DivergentDesign {
 
   // input workload and data table
   private Query[] workload;
@@ -53,8 +53,8 @@ public class DivgDesign {
    * @param maxIteration,      input iteration threshold
    * @param epsilon,           input epsilon threshold
    */
-  public DivgDesign(DataTable data, Query[] queries,
-                    int replicaNum, int loadBalanceFactor, int maxIteration, double epsilon, boolean isNewMethod) {
+  public DivergentDesign(DataTable data, Query[] queries,
+                         int replicaNum, int loadBalanceFactor, int maxIteration, double epsilon, boolean isNewMethod) {
     this.data = new DataTable(data);
     this.replicaNum = replicaNum;
     this.loadBalanceFactor = loadBalanceFactor;
@@ -75,7 +75,7 @@ public class DivgDesign {
    * @param dataTable, input data table
    * @param queries,   input queries
    */
-  public DivgDesign(DataTable dataTable, Query[] queries) {
+  public DivergentDesign(DataTable dataTable, Query[] queries) {
     this.data = new DataTable(dataTable);
     this.workload = new Query[queries.length];
     System.arraycopy(queries, 0, workload, 0, workload.length);

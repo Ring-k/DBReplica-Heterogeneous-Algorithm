@@ -23,13 +23,18 @@ public class Rita {
 
   private int replicaNumber;
   private double temperature;
+  private double temperatureDecreaseRate;
   private int iteration = 0;
   private int optimalCnt = 0;
   private double skewFactor = 0.0; // 0 = balance case
+  private int optimalCountThreshold;
+  private double temperatureInitSeed;
 
   private int loadBalanceFactor = 0;
   private int candidateBalanceFactor = 0;
   private boolean isNewMethod = false;
+
+  private int localIterationNumberThreshold;
 
   // the solution
   private MultiReplicas multiReplicas = null;
@@ -51,19 +56,29 @@ public class Rita {
     this.isNewMethod = Constant.IS_NEW_METHOD;
     if (replicaNumber == loadBalanceFactor) candidateBalanceFactor = replicaNumber;
     else candidateBalanceFactor = loadBalanceFactor + 1;
+    this.temperatureDecreaseRate = Constant.TEMPERATURE_DECREASE_RATE;
+    this.optimalCountThreshold = Constant.OPTIMAL_COUNT_THRESHOLD;
+    this.localIterationNumberThreshold = Constant.LOCAL_ITERATION_NUM;
+    this.temperatureInitSeed = Constant.TEMPERATURE_INIT_SEED;
   }
 
   /**
-   * @param dataTable              info of the table
-   * @param queries                info of the workload
-   * @param replicaNumber          number of replicas
-   * @param loadBalanceFactor      value of load balance factor m
-   * @param candidateBalanceFactor value of candidate balance factor, greater than m
-   * @param skewFactor             value of skew factor, so tha min(cost) * skewFactor >= max(cost)
-   * @param isNewMethod            if use cask effect objective function or not
+   * @param dataTable                     info of the table
+   * @param queries                       info of the workload
+   * @param replicaNumber                 number of replicas
+   * @param loadBalanceFactor             value of load balance factor m
+   * @param candidateBalanceFactor        value of candidate balance factor, greater than m
+   * @param temperatureDecreaseRate       temperature decrease rate
+   * @param optimalCountThreshold         optimal count threshold
+   * @param localIterationNumberThreshold local  iteration number threshold
+   * @param temperatureInitSeed           temperature initialize seed
+   * @param skewFactor                    value of skew factor, so tha min(cost) * skewFactor >= max(cost)
+   * @param isNewMethod                   if use cask effect objective function or not
    */
   public Rita(DataTable dataTable, Query[] queries,
-              int replicaNumber, int loadBalanceFactor, int candidateBalanceFactor, double skewFactor, boolean isNewMethod) {
+              int replicaNumber, int loadBalanceFactor, int candidateBalanceFactor,
+              double temperatureDecreaseRate, int optimalCountThreshold, int localIterationNumberThreshold, double temperatureInitSeed,
+              double skewFactor, boolean isNewMethod) {
     if (loadBalanceFactor > replicaNumber
             || candidateBalanceFactor < loadBalanceFactor
             || candidateBalanceFactor > replicaNumber)
@@ -75,6 +90,10 @@ public class Rita {
     this.loadBalanceFactor = loadBalanceFactor;
     this.candidateBalanceFactor = candidateBalanceFactor;
     this.isNewMethod = isNewMethod;
+    this.temperatureDecreaseRate = temperatureDecreaseRate;
+    this.optimalCountThreshold = optimalCountThreshold;
+    this.localIterationNumberThreshold = localIterationNumberThreshold;
+    this.temperatureInitSeed = temperatureInitSeed;
   }
 
   /**
@@ -198,7 +217,7 @@ public class Rita {
    * Method to decrease temperature. When it is called, temperature * 0.7.
    */
   private void decreaseTemperature() {
-    temperature *= Constant.TEMPERATURE_DECREASE_RATE;
+    temperature *= temperatureDecreaseRate;
   }
 
   /**
@@ -208,7 +227,7 @@ public class Rita {
    * @return true if converges
    */
   private boolean isGlobalConverge() {
-    return optimalCnt == Constant.OPTIMAL_COUNT_THRESHOLD;
+    return optimalCnt == optimalCountThreshold;
   }
 
   /**
@@ -220,7 +239,7 @@ public class Rita {
   private boolean isLocalConverge() {
 //    return temperature == 0
 //            || iteration == Constant.LOCAL_ITERATION_NUM;
-    return iteration == Constant.LOCAL_ITERATION_NUM;
+    return iteration == localIterationNumberThreshold;
   }
 
   /**
@@ -240,7 +259,7 @@ public class Rita {
     }
     if (min == null) throw new NullPointerException();
     temperature = min.subtract(max)
-            .divide(BigDecimal.valueOf(Math.log(Constant.TEMPERATURE_INIT_SEED)),
+            .divide(BigDecimal.valueOf(Math.log(temperatureInitSeed)),
                     10, BigDecimal.ROUND_HALF_UP)
             .doubleValue();
   }

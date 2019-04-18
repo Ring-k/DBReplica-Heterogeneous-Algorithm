@@ -19,7 +19,7 @@ public class Histogram implements Serializable {
   private int[] yCoordinate;
   private double[] probability;
   private int pointsNum;
-  private double step = Constant.histogramStep;
+  private double step = Constant.HISTOGRAM_STEP;
   private int groupNumber;
 
   /**

@@ -26,6 +26,12 @@ public class SimulateAnneal {
   private int optimalCnt = 0;
   private boolean isNewMethod = true;
 
+  // simulate annealing parameters
+  private double temperatureDecreaseRate;
+  private int optimalCountThreshold;
+  private int localIterationNumber;
+  private double temperatureInitSeed;
+
   // the solution
   private MultiReplicas multiReplicas = null;
   private BigDecimal optimalCost;
@@ -41,6 +47,10 @@ public class SimulateAnneal {
     this.data = dataTable;
     this.queries = queries;
     this.replicaNumber = Constant.REPLICA_NUMBER;
+    this.temperatureDecreaseRate = Constant.TEMPERATURE_DECREASE_RATE;
+    this.optimalCountThreshold = Constant.OPTIMAL_COUNT_THRESHOLD;
+    this.localIterationNumber = Constant.LOCAL_ITERATION_NUM;
+    this.temperatureInitSeed = Constant.TEMPERATURE_INIT_SEED;
   }
 
   /**
@@ -55,6 +65,54 @@ public class SimulateAnneal {
     this.queries = queries;
     this.replicaNumber = replicaNumber;
     this.isNewMethod = isNewMethod;
+    this.temperatureDecreaseRate = Constant.TEMPERATURE_DECREASE_RATE;
+    this.optimalCountThreshold = Constant.OPTIMAL_COUNT_THRESHOLD;
+    this.localIterationNumber = Constant.LOCAL_ITERATION_NUM;
+    this.temperatureInitSeed = Constant.TEMPERATURE_INIT_SEED;
+  }
+
+  /**
+   * Set temperature decrease rate
+   *
+   * @param temperatureDecreaseRate customized temperature decrease rate
+   * @return the simulate anneal instance
+   */
+  public SimulateAnneal withTemperatureDecreaseRate(double temperatureDecreaseRate) {
+    this.temperatureDecreaseRate = temperatureDecreaseRate;
+    return this;
+  }
+
+  /**
+   * Set optimal count threshold (iterations of outer loop)
+   *
+   * @param threshold customized optimal count threshold
+   * @return the simulate anneal instance
+   */
+  public SimulateAnneal withOptimalCountThreshold(int threshold) {
+    this.optimalCountThreshold = threshold;
+    return this;
+  }
+
+  /**
+   * Set local iteration number threshold
+   *
+   * @param num customized local iteration number threshold
+   * @return the simulate anneal instance
+   */
+  public SimulateAnneal withLocalIterationNumber(int num) {
+    this.localIterationNumber = num;
+    return this;
+  }
+
+  /**
+   * Set temperature initialize seed
+   *
+   * @param seed customized temperature initial seed
+   * @return
+   */
+  public SimulateAnneal withTemperatureInitSeed(double seed) {
+    this.temperatureInitSeed = seed;
+    return this;
   }
 
 
@@ -202,7 +260,7 @@ public class SimulateAnneal {
    * Method to decrease temperature. When it is called, temperature * 0.7.
    */
   private void decreaseTemperature() {
-    temperature *= Constant.TEMPERATURE_DECREASE_RATE;
+    temperature *= temperatureDecreaseRate;
   }
 
   /**
@@ -212,7 +270,7 @@ public class SimulateAnneal {
    * @return true if converges
    */
   private boolean isGlobalConverge() {
-    return optimalCnt == Constant.OPTIMAL_COUNT_THRESHOLD;
+    return optimalCnt == optimalCountThreshold;
   }
 
   /**
@@ -224,7 +282,7 @@ public class SimulateAnneal {
   private boolean isLocalConverge() {
 //    return temperature == 0
 //            || iteration == Constant.LOCAL_ITERATION_NUM;
-    return iteration == Constant.LOCAL_ITERATION_NUM;
+    return iteration == localIterationNumber;
   }
 
   /**
@@ -249,7 +307,7 @@ public class SimulateAnneal {
 //    System.out.println("xxxxxxxxxxxxxxx");
     if (min == null) throw new NullPointerException();
     temperature = min.subtract(max)
-            .divide(BigDecimal.valueOf(Math.log(Constant.TEMPERATURE_INIT_SEED)),
+            .divide(BigDecimal.valueOf(Math.log(temperatureInitSeed)),
                     10, BigDecimal.ROUND_HALF_UP)
             .doubleValue();
   }

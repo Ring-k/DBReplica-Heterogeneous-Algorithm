@@ -33,8 +33,9 @@ public class RitaDemo {
     Replica replica = new SearchAll(dataTable, queries).optimalReplica();
 
     for (double i = 0.1; i <= 1; i += 0.1) {
-      Constant.SKEW_FACTOR = i;
-      Rita rt = new Rita(dataTable, queries, 3, 2, 2, 0.5, true).initSolution(replica);
+      Rita rt = new Rita(dataTable, queries, 3, 2, 2,
+              Constant.TEMPERATURE_DECREASE_RATE, Constant.OPTIMAL_COUNT_THRESHOLD, Constant.LOCAL_ITERATION_NUM,
+              Constant.TEMPERATURE_INIT_SEED, i, true).initSolution(replica);
       double cost = CostModel.cost(rt.optimal(), queries).doubleValue();
       System.out.println(i + ", " + cost);
     }

@@ -23,16 +23,37 @@ public class SearchAll {
   private List<BigDecimal> history = new ArrayList<>();
 
 
+  /**
+   * Constructor of search all (brute force) method, using default replica number
+   * @param dataTable info of the data table
+   * @param queries info of the queries
+   */
   public SearchAll(DataTable dataTable, Query[] queries) {
     this.dataTable = dataTable;
     this.queries = queries;
     this.replicaNum = Constant.REPLICA_NUMBER;
   }
 
+  /**
+   * Constructor of search all (brute force) method
+   * @param dataTable info of the data table
+   * @param queries info of the queries
+   * @param replicaNumber customized replica number
+   */
+  public SearchAll(DataTable dataTable, Query[] queries, int replicaNumber){
+    this.dataTable = dataTable;
+    this.queries = queries;
+    this.replicaNum = replicaNumber;
+  }
 
+
+  /**
+   * generate optimal multi-replicas
+   * @return
+   */
   public MultiReplicas optimal() {
     List<int[]> singleReplicas = Permutation.getPerm(0, dataTable.getColNum() - 1, dataTable.getColNum(), false);
-    List<int[]> replicasOrder = Permutation.getPerm(0, singleReplicas.size()-1, Constant.REPLICA_NUMBER, true);
+    List<int[]> replicasOrder = Permutation.getPerm(0, singleReplicas.size()-1, replicaNum, true);
     int counter = 0;
     for (int[] ro : replicasOrder) {
       MultiReplicas m = new MultiReplicas();
@@ -49,6 +70,10 @@ public class SearchAll {
     return multiReplicas;
   }
 
+  /**
+   * Generate an optimal replica
+   * @return
+   */
   public Replica optimalReplica(){
     List<int[]> singleReplicas = Permutation.getPerm(0, dataTable.getColNum() - 1, dataTable.getColNum(), false);
     Replica ans = null;

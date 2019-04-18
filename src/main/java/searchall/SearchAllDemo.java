@@ -27,18 +27,17 @@ public class SearchAllDemo {
     int col = Integer.parseInt(args[0]);
     DataTable dataTable = getDataTable(col);
     Query[] queries = getQueries(col);
-    SearchAll sa = new SearchAll(dataTable, queries);
-    Constant.REPLICA_NUMBER = 1;
+    SearchAll sa = new SearchAll(dataTable, queries, 1);
     Replica r = sa.optimalReplica();
     List<BigDecimal> history = sa.getHistory();
     System.out.println(Arrays.toString(r.getOrder()));
     System.out.println(sa.getOptimalCost());
 
     File f = new File("search_all_history1.csv");
-    if(!f.exists()) f.createNewFile();
+    if (!f.exists()) f.createNewFile();
     FileWriter fw = new FileWriter(f, true);
-    for( BigDecimal d : history)
-      fw.write(d.toString()+"\n");
+    for (BigDecimal d : history)
+      fw.write(d.toString() + "\n");
     fw.flush();
     fw.close();
   }
