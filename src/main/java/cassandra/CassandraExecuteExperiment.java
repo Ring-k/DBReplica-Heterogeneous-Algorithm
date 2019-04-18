@@ -44,12 +44,14 @@ public class CassandraExecuteExperiment {
     // initialize data table, queries, replicas
     Query[] queries = DataLoader.getQueries("queries");
     DataTable dataTable = DataLoader.getDataTable("data_table");
+//    Query[] queries = DataLoader.getQueries();
+//    DataTable dataTable = DataLoader.getDataTable();
     Replica[] replicas = {new Replica(dataTable, replicaOrder0),
             new Replica(dataTable, replicaOrder1),
             new Replica(dataTable, replicaOrder2)};
 
     // initialize time consumption
-    long[] times = new long[replicas.length];
+    double[] times = new double[replicas.length];
     for (int i = 0; i < times.length; i++) times[i] = 0;
 
     int curQueryNumber = 0;
@@ -61,8 +63,12 @@ public class CassandraExecuteExperiment {
       for (int i = 0; i < replicas.length; i++)
         costs[i] = CostModel.cost(replicas[i], query);
       Integer[] replicaOrder = new Integer[replicas.length];
-      for (int i = 0; i < replicaOrder.length; i++) replicaOrder[i] = 0;
+      for (int i = 0; i < replicaOrder.length; i++) replicaOrder[i] = i;
       Arrays.sort(replicaOrder, Comparator.comparing(o -> costs[o]));
+
+
+      System.out.print("eva costs: " + Arrays.toString(costs));
+      System.out.println(" order:" + Arrays.toString(replicaOrder));
 
       int number = 1;
       for (int i = 1; i < replicas.length; i++)
@@ -72,23 +78,26 @@ public class CassandraExecuteExperiment {
       String queryCommand;
 
       // rout query command and get result
+      System.out.print("query" + curQueryNumber + " ");
       for (int i = 0; i < number; i++) {
         int replicaIndex = replicaOrder[i];
         queryCommand = Command.getString(outputPath + "_rp" + replicaIndex, query);
-        long start = System.currentTimeMillis();
+        long start = System.nanoTime();
         executeResult = session.execute(queryCommand);
-        long time = System.currentTimeMillis() - start;
+        long time = System.nanoTime() - start;
         times[replicaIndex] += ((double) time / number);
+        System.out.print(queryCommand);
+        System.out.print("#rout: " + number);
       }
 
       // print result
       for (Row row : executeResult) {
         long v = row.getLong("count");
-        if (v != 0) {
-          System.out.print("query" + curQueryNumber + " ");
-          System.out.println(v);
-        }
+//        if (v != 0) {
+          System.out.println(" result:" + v);
+//        }
       }
+      System.out.println();
       curQueryNumber++;
     }
 
@@ -103,11 +112,11 @@ public class CassandraExecuteExperiment {
     outputString += "\n";
     if (mode == 1) {
       long sum = 0;
-      for (long i : times) sum += i;
+      for (double i : times) sum += i;
       outputString += ("total = " + sum + "\n");
     } else {
-      long max = 0;
-      for (long i : times) if (max < i) max = i;
+      double max = 0;
+      for (double i : times) if (max < i) max = i;
       outputString += ("max = " + max + "\n");
     }
     System.out.println(outputString);
