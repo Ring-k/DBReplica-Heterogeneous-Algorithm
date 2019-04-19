@@ -61,7 +61,8 @@ public class DivgDesignDemo {
   }
 
   static DataTable generateDataTable(int colNum, int rowNum, int group) throws NoSuchAlgorithmException {
-    Random rand = SecureRandom.getInstanceStrong();
+//    Random rand = SecureRandom.getInstanceStrong();
+    Random rand = new Random();
     Histogram[] hs = new Histogram[colNum];
     int c = 1;
     for(int i = 0; i < colNum; i++){

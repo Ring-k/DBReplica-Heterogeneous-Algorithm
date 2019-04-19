@@ -147,7 +147,8 @@ public class Rita {
    */
   private static Replica generateNewReplica(Replica replica)
           throws NoSuchAlgorithmException {
-    Random rand = SecureRandom.getInstanceStrong();
+//    Random rand = SecureRandom.getInstanceStrong();
+    Random rand = new Random();
     int columnNum = replica.getDataTable().getColNum();
     int pos0 = 0;
     int pos1 = 0;

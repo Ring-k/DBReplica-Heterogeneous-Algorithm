@@ -1,4 +1,4 @@
-package cassandra;
+package experiment.cassandra;
 
 import query.MiniQuery;
 import query.PointQuery;
@@ -10,7 +10,7 @@ import java.util.Date;
 
 public class Command {
 
-  static String getString(String tableName, Query query) {
+  public static String getString(String tableName, Query query) {
     String[] clusteringKeysNames = "L_ORDERKEY,L_PARTKEY,L_SUPPKEY,L_LINENUMBER,L_SHIPDATE,L_COMMITDATE,L_RECEIPTDATE".split(",");
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     String cmd = "select count(*) from " + tableName + " where pkey = 1 and ";

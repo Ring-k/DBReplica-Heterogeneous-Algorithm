@@ -1,4 +1,4 @@
-package cassandra;
+package experiment.cassandra;
 
 import com.datastax.driver.core.*;
 import cost.CostModel;
@@ -34,7 +34,7 @@ public class CassandraExecuteExperiment {
     if (!f.exists()) f.createNewFile();
     FileWriter fw = new FileWriter(f, true);
 
-    // connect to cassandra
+    // connect to experiment.cassandra
     String node = "localhost";
     String keyspace = "tpch";
     SocketOptions so = new SocketOptions().setReadTimeoutMillis(10000000).setConnectTimeoutMillis(100000000);
@@ -45,7 +45,7 @@ public class CassandraExecuteExperiment {
     Query[] queries = DataLoader.getQueries("queries");
     DataTable dataTable = DataLoader.getDataTable("data_table");
 //    Query[] queries = DataLoader.getQueries();
-//    DataTable dataTable = DataLoader.getDataTable();
+//    DataTable dataTable = DataLoader.getDataTableFromCsv();
     Replica[] replicas = {new Replica(dataTable, replicaOrder0),
             new Replica(dataTable, replicaOrder1),
             new Replica(dataTable, replicaOrder2)};

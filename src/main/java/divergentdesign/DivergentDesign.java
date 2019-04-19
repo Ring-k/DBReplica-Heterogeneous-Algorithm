@@ -14,6 +14,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.*;
 
+import static cost.CostModel.getCostArray;
+import static cost.CostModel.getLeastCostConfOrder;
+
 
 /**
  * This class implement divergent design algorithm. When suing it, create an instance of
@@ -113,7 +116,7 @@ public class DivergentDesign {
         m.add(new Replica(recommendReplica(workloadSubsets[i])));
       }
       if (isNewMethod)
-        curCost = CostModel.cost(m, workload).doubleValue();
+        curCost = CostModel.cost(m, workload, loadBalanceFactor).doubleValue();
       else
         curCost = totalCost(multiReplicas);
       if (isIterationTerminate(it, curCost)) break;
@@ -125,10 +128,17 @@ public class DivergentDesign {
         curSubQueries[i] = new ArrayList<>();
       // add queries to cost least groups
       for (Query query : workload) {
-        int[] order = getLeastCostConfOrder(multiReplicas, query);
-        for (int i = 0; i < loadBalanceFactor; i++)
+        BigDecimal[] costArray = getCostArray(multiReplicas, query);
+        int[] order = getLeastCostConfOrder(costArray);
+        int leastCostNumber = 1;
+        for (int i = 1; i < costArray.length; i++) {
+          if (costArray[order[i]].compareTo(costArray[order[0]]) == 0)
+            leastCostNumber++;
+        }
+        if (leastCostNumber < loadBalanceFactor) leastCostNumber = loadBalanceFactor;
+        for (int i = 0; i < leastCostNumber; i++)
           curSubQueries[order[i]].add(new Query(query)
-                  .setWeight(query.getWeight() / loadBalanceFactor));
+                  .setWeight(query.getWeight() / leastCostNumber));
       }
       System.arraycopy(curSubQueries, 0, workloadSubsets, 0, replicaNum);
     }
@@ -146,7 +156,8 @@ public class DivergentDesign {
    * into different query groups.
    */
   private void initDesign() throws NoSuchAlgorithmException {
-    Random random = SecureRandom.getInstanceStrong();
+//    Random random = SecureRandom.getInstanceStrong();
+    Random random = new Random();
     for (Query q : workload)
       for (int j = 0; j < loadBalanceFactor; j++)
         workloadSubsets[random.nextInt(workloadSubsets.length)]
@@ -191,17 +202,43 @@ public class DivergentDesign {
    * @param query,    the query need to evaluate
    * @return order of m-cost-least replicas
    */
-  private int[] getLeastCostConfOrder(Replica[] replicas, Query query) {
-    Integer[] order = new Integer[replicaNum];
-    for (int i = 0; i < order.length; i++) order[i] = i;
-    BigDecimal[] costs = new BigDecimal[replicaNum];
-    for (int i = 0; i < costs.length; i++)
-      costs[i] = CostModel.cost(replicas[i], query);
-    Arrays.sort(order, Comparator.comparing(o -> costs[o]));
-    int[] res = new int[loadBalanceFactor];
-    for (int i = 0; i < res.length; i++) res[i] = order[i];
-    return res;
-  }
+//  // TODO duplicate
+//  private int[] getLeastCostConfOrder(Replica[] replicas, Query query) {
+//    Integer[] order = new Integer[replicaNum];
+//    for (int i = 0; i < order.length; i++) order[i] = i;
+//    BigDecimal[] costs = getCostArray(replicas, query);
+//    Arrays.sort(order, Comparator.comparing(o -> costs[o]));
+//    int[] res = new int[replicas.length];
+//    for (int i = 0; i < res.length; i++) res[i] = order[i];
+//    return res;
+//  }
+//
+//  // TODO duplicate
+//  private int[] getLeastCostConfOrder(BigDecimal[] costArray) {
+//    Integer[] order = new Integer[replicaNum];
+//    for (int i = 0; i < order.length; i++) order[i] = i;
+//    Arrays.sort(order, Comparator.comparing(o -> costArray[o]));
+//    int[] res = new int[costArray.length];
+//    for (int i = 0; i < res.length; i++) res[i] = order[i];
+//    return res;
+//  }
+//
+//  // TODO duplicate
+//  private BigDecimal[] getCostArray(Replica[] replicas, Query query) {
+//    BigDecimal[] res = new BigDecimal[replicas.length];
+//    for (int i = 0; i < replicas.length; i++) res[i] = CostModel.cost(replicas[i], query);
+//    return res;
+//  }
+
+//  public double cost(Replica[] multiReplicas) {
+//    BigDecimal[] costOnEachReplica = new BigDecimal[multiReplicas.length];
+//    for (BigDecimal b : costOnEachReplica) b = new BigDecimal(0);
+//
+//    for (Query q : workload) {
+//      BigDecimal costs = getCostArray(multiReplicas, );
+//    }
+//
+//  }
 
   /**
    * The total cost of a design, according to formula in paper
@@ -213,12 +250,19 @@ public class DivergentDesign {
     BigDecimal ans = new BigDecimal("0");
     for (Query query : workload) {
       BigDecimal curCost = new BigDecimal("0");
-      int[] order = getLeastCostConfOrder(mulReplicas, query);
-      for (int i = 0; i < loadBalanceFactor; i++)
+      BigDecimal[] costArray = getCostArray(mulReplicas, query);
+      int[] order = getLeastCostConfOrder(costArray);
+      int number = 1;
+      for(int i = 0; i < costArray.length; i++){
+        if(costArray[order[i]].compareTo(costArray[order[0]]) == 0)
+          number++;
+      }
+      if(number < loadBalanceFactor) number = loadBalanceFactor;
+      for (int i = 0; i < number; i++)
         curCost = curCost
                 .add(CostModel.cost(mulReplicas[order[i]], query)
-                        .multiply(BigDecimal.valueOf((double) 1 / loadBalanceFactor))
-                        .divide(BigDecimal.valueOf(loadBalanceFactor)));
+                        .multiply(BigDecimal.valueOf((double) 1 / number))
+                        .divide(BigDecimal.valueOf(number)));
       ans = ans.add(curCost);
     }
     return ans.doubleValue();

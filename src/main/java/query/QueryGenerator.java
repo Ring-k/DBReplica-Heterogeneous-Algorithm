@@ -3,7 +3,6 @@ package query;
 import datamodel.DataTable;
 
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.Random;
 
 public class QueryGenerator {
@@ -20,7 +19,8 @@ public class QueryGenerator {
 
   private void generate() throws NoSuchAlgorithmException {
     int colNum = dataTable.getColNum();
-    Random rand = SecureRandom.getInstanceStrong();
+//    Random rand = SecureRandom.getInstanceStrong();
+    Random rand = new Random();
     for (int i = 0; i < queries.length; i++) { // for a query
       MiniQuery[] miniQueries = new MiniQuery[colNum];
       for (int j = 0; j < colNum; j++) { //  of each column

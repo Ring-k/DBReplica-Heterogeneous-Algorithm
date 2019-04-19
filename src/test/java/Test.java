@@ -27,7 +27,7 @@
 //
 //  @org.junit.Test
 //  public void testInit() throws IOException, ClassNotFoundException {
-//    DataTable dataTable = getDataTable();
+//    DataTable dataTable = getDataTableFromCsv();
 //    Query[] queries = getQueries();
 //    int[] order = QueryAnalysis.getRangeQueryNumber(queries);
 //    System.out.println(Arrays.toString(order));
@@ -81,7 +81,7 @@
 //    System.out.println(Arrays.toString(QueryAnalysis.getRangeQueryNumber(queries)));
 //  }
 //
-//  static DataTable getDataTable() throws IOException, ClassNotFoundException {
+//  static DataTable getDataTableFromCsv() throws IOException, ClassNotFoundException {
 //    ObjectInputStream ois = new ObjectInputStream(new FileInputStream("data\\data_table"));
 ////    ObjectInputStream ois = new ObjectInputStream(new FileInputStream("data_table"));
 //    return (DataTable) ois.readObject();
@@ -94,7 +94,7 @@
 //  }
 //
 //  public static void main(String args[]) throws IOException, ClassNotFoundException, NoSuchAlgorithmException {
-//    DataTable dataTable1 = getDataTable();
+//    DataTable dataTable1 = getDataTableFromCsv();
 //    Histogram[] his = dataTable1.getColHistograms();
 //    Histogram[] h = new Histogram[5];
 //    for (int i = 0; i < h.length; i++)

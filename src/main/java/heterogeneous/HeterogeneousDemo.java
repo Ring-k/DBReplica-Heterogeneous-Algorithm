@@ -49,13 +49,14 @@ public class HeterogeneousDemo {
   }
 
   static DataTable generateDataTable(int colNum, int rowNum, int group) throws NoSuchAlgorithmException {
-    Random rand = SecureRandom.getInstanceStrong();
+//    Random rand = SecureRandom.getInstanceStrong();
+    Random rand = new Random();
     Histogram[] hs = new Histogram[colNum];
     int c = 1;
-    for(int i = 0; i < colNum; i++){
+    for (int i = 0; i < colNum; i++) {
       List<Double> l = new ArrayList<>();
-      for(int j = 0; j < rowNum; j++)
-        l.add(rand.nextDouble()*c);
+      for (int j = 0; j < rowNum; j++)
+        l.add(rand.nextDouble() * c);
       c *= 10;
       hs[i] = new Histogram(l, group);
     }

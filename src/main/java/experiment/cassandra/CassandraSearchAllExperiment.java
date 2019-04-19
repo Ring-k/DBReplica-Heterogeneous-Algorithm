@@ -1,4 +1,4 @@
-package cassandra;
+package experiment.cassandra;
 
 import com.datastax.driver.core.*;
 import dataloader.DataLoader;
@@ -19,7 +19,7 @@ public class CassandraSearchAllExperiment {
     if (!f.exists()) f.createNewFile();
     FileWriter fw = new FileWriter(f, true);
 
-    // connect to cassandra
+    // connect to experiment.cassandra
     String node = "localhost";
     String keyspace = "tpch";
     SocketOptions so = new SocketOptions().setReadTimeoutMillis(10000000).setConnectTimeoutMillis(100000000);

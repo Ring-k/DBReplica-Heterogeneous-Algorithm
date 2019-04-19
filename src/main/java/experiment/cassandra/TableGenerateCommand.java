@@ -1,4 +1,4 @@
-package cassandra;
+package experiment.cassandra;
 
 public class TableGenerateCommand {
   public static void main(String args[]){

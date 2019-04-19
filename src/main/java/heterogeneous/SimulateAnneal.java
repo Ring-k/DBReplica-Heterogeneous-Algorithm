@@ -147,21 +147,24 @@ public class SimulateAnneal {
       optimalCost = CostModel.totalCost(multiReplicas, queries);
     costHistory.add(optimalCost.doubleValue());
 //    CostModel.analysisEachReplica(multiReplicas, queries);// TODO print something here
+
     while (!isGlobalConverge()) {
+      System.out.println("SA { iteration: " + iteration + ", cost: " + optimalCost.setScale(10, BigDecimal.ROUND_HALF_UP).toString() + "  }"); // Print something here
       MultiReplicas curMultiReplica = new MultiReplicas(multiReplicas);
       BigDecimal curCost = optimalCost;
       while (!isLocalConverge()) {
         // generate new solution
         MultiReplicas newMultiReplica = generateNewMultiReplica(curMultiReplica);
         BigDecimal newCost;
-        if (isNewMethod)
+        if (isNewMethod) {
           newCost = CostModel.cost(newMultiReplica, queries);
-        else
+        } else
           newCost = CostModel.totalCost(newMultiReplica, queries);
         if (isChosen(newCost, curCost)) {
           curMultiReplica = newMultiReplica;
           curCost = newCost;
         }
+
 //        CostModel.analysisEachReplica(curMultiReplica, queries);//TODO print something here
         costHistory.add(curCost.doubleValue());
         iteration++;
@@ -188,12 +191,12 @@ public class SimulateAnneal {
    * @param replica, the original replica
    * @return new replica
    */
-  private static Replica generateNewReplica(Replica replica)
-          throws NoSuchAlgorithmException {
-    Random rand = SecureRandom.getInstanceStrong();
+  private static Replica generateNewReplica(Replica replica) {
+    Random rand = new Random();
     int columnNum = replica.getDataTable().getColNum();
     int pos0 = 0;
     int pos1 = 0;
+
     while (pos0 == pos1) {
       pos0 = rand.nextInt(columnNum);
       pos1 = rand.nextInt(columnNum);
@@ -201,6 +204,7 @@ public class SimulateAnneal {
     int len = rand.nextInt(columnNum - pos0) + 1;
     int seed = rand.nextInt(100);
     int[] newOrder = null;
+
     if (isIn(seed, 0, 5))
 //      newOrder = ArrayTransform.shuffle(replica.getOrder());
       newOrder = ArrayTransform.swap(replica.getOrder(), pos0, pos1);
@@ -217,6 +221,7 @@ public class SimulateAnneal {
     else if (isIn(seed, 95, 100))
 //      newOrder = ArrayTransform.reverse(replica.getOrder());
       newOrder = ArrayTransform.swap(replica.getOrder(), pos0, pos1);
+
     if (newOrder == null) throw new NullPointerException();
     return new Replica(replica.getOriginalDataTable(), newOrder);
   }
@@ -228,8 +233,7 @@ public class SimulateAnneal {
    * @param multiReplica, original multi-replica
    * @return a generated new multi-replica
    */
-  private MultiReplicas generateNewMultiReplica(MultiReplicas multiReplica)
-          throws NoSuchAlgorithmException {
+  private MultiReplicas generateNewMultiReplica(MultiReplicas multiReplica) {
     MultiReplicas ans;
     do {
       ans = new MultiReplicas();

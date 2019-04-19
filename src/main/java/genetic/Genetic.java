@@ -124,7 +124,8 @@ public class Genetic {
    * @return the picked new generation
    */
   private MultiReplicas[] copy(MultiReplicas[] population) throws NoSuchAlgorithmException {
-    Random random = SecureRandom.getInstanceStrong();
+//    Random random = SecureRandom.getInstanceStrong();
+    Random random = new Random();
     BigDecimal[] fitArr = fit(population);
     BigDecimal total = new BigDecimal(0);
     for (BigDecimal fitness : fitArr) total = total.add(fitness);
@@ -160,7 +161,7 @@ public class Genetic {
     if (m1.getReplicaNum() != m2.getReplicaNum())
       throw new IllegalArgumentException("Replica numbers are inconsistent");
     // save first index(i) of element
-    int crossoverPoint = SecureRandom.getInstanceStrong()
+    int crossoverPoint = new Random()
             .nextInt(m1.getReplicaNum() - 1) + 1;
     Replica[] mr1 = m1.getReplicasArray(true);
     Replica[] mr2 = m2.getReplicasArray(true);
@@ -376,7 +377,8 @@ public class Genetic {
 
   private Replica generateNewReplica(Replica replica)
           throws NoSuchAlgorithmException {
-    Random rand = SecureRandom.getInstanceStrong();
+//    Random rand = SecureRandom.getInstanceStrong();
+    Random rand = new Random();
     int columnNum = replica.getDataTable().getColNum();
     int pos0 = 0;
     int pos1 = 0;

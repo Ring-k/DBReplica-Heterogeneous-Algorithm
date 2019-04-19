@@ -12,7 +12,7 @@
 //
 //  @Test
 //  public void testReplica() throws IOException, ClassNotFoundException {
-//    DataTable dataTable = DataLoader.getDataTable();
+//    DataTable dataTable = DataLoader.getDataTableFromCsv();
 //    Query[] queries = DataLoader.getQueries();
 //    System.out.println(dataTable.toString());
 //

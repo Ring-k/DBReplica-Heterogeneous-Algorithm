@@ -1,6 +1,4 @@
 import java.io.*;
-import java.lang.reflect.Array;
-import java.util.Arrays;
 
 public class Output {
   public static void main(String args[]) throws IOException {
