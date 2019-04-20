@@ -30,7 +30,12 @@ public class DataTable implements Serializable {
    * @param histo, a collection of column data histograms, ordered by column index
    */
   public DataTable(Histogram[] histo) {
-    rowNum = Constant.ROW_NUM;
+    int n = -1;
+    for(int i = 0; i < histo.length; i++){
+      if(n == -1) n = histo[i].getPointsNum();
+      else if (n != histo[i].getPointsNum()) throw new IllegalArgumentException();
+    }
+    rowNum = BigDecimal.valueOf(histo[0].getPointsNum());
     colNum = histo.length;
     colHistograms = histo;
   }

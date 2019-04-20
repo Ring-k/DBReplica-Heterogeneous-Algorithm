@@ -7,9 +7,6 @@ public class Constant {
   // Histogram
   public static final double HISTOGRAM_STEP = 1;
 
-  // DataTable
-  public static BigDecimal ROW_NUM = new BigDecimal("1");
-
   // Objective System
   public static final int REPLICA_NUMBER = 3;
 

@@ -202,4 +202,8 @@ public class Histogram implements Serializable {
     result = 31 * result + Arrays.hashCode(probability);
     return result;
   }
+
+  public int getPointsNum() {
+    return pointsNum;
+  }
 }
