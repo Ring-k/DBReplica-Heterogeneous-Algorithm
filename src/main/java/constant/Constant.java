@@ -26,7 +26,7 @@ public class Constant {
 
   // Rita
   public static final double SKEW_FACTOR = 0.5;
-  public static final boolean IS_NEW_METHOD = false;
+  public static final boolean IS_NEW_METHOD = true;
 
   //GA
   public static final int GA_MAX_ITERATION = 1000;

@@ -23,13 +23,12 @@ public class CassandraExecuteExperiment {
    * @param replicaOrder1 Clustering key order of 2-nd replica
    * @param replicaOrder2 Clustering key order of 3-rd replica
    * @param method        The method to use, one of {"simulateanneal", "searchall", "genetic", "divergent"}
-   * @param mode          The mode to use, 0 means cask-effect mode, 1 means total cost mode
    * @param queryNumbers  Number of queries need to evaluate
    */
   static void runExp(int[] replicaOrder0, int[] replicaOrder1, int[] replicaOrder2,
-                     String method, int mode, int queryNumbers) throws IOException, ClassNotFoundException {
+                     String method, int queryNumbers) throws IOException, ClassNotFoundException {
     // prepare for the experiment output
-    String outputPath = method + "_" + "mod" + mode;
+    String outputPath = method;
     File f = new File(outputPath + ".out");
     if (!f.exists()) f.createNewFile();
     FileWriter fw = new FileWriter(f, true);
@@ -94,7 +93,7 @@ public class CassandraExecuteExperiment {
       for (Row row : executeResult) {
         long v = row.getLong("count");
 //        if (v != 0) {
-          System.out.println(" result:" + v);
+        System.out.println(" result:" + v);
 //        }
       }
       System.out.println();
@@ -110,15 +109,11 @@ public class CassandraExecuteExperiment {
     for (int i = 0; i < replicas.length; i++)
       outputString += ("time on replica" + i + ": " + times[i] + "; ");
     outputString += "\n";
-    if (mode == 1) {
-      long sum = 0;
-      for (double i : times) sum += i;
-      outputString += ("total = " + sum + "\n");
-    } else {
-      double max = 0;
-      for (double i : times) if (max < i) max = i;
-      outputString += ("max = " + max + "\n");
-    }
+
+    double max = 0;
+    for (double i : times) if (max < i) max = i;
+    outputString += ("max = " + max + "\n");
+
     System.out.println(outputString);
     fw.write(outputString);
     fw.flush();
@@ -128,13 +123,12 @@ public class CassandraExecuteExperiment {
   /**
    * Experiment using default query number, 1000
    */
-  static void runExp(int[] replicaOrder0, int[] replicaOrder1, int[] replicaOrder2, String method, int mode) throws IOException, ClassNotFoundException {
-    runExp(replicaOrder0, replicaOrder1, replicaOrder2, method, mode, 1000);
+  static void runExp(int[] replicaOrder0, int[] replicaOrder1, int[] replicaOrder2, String method) throws IOException, ClassNotFoundException {
+    runExp(replicaOrder0, replicaOrder1, replicaOrder2, method, 1000);
   }
 
   public static void main(String args[]) throws IOException, ClassNotFoundException {
     String method = args[0];
-    int mode = Integer.parseInt(args[1]);
     String[] order0 = args[2].split(",");
     String[] order1 = args[3].split(",");
     String[] order2 = args[4].split(",");
@@ -146,6 +140,6 @@ public class CassandraExecuteExperiment {
     int[] rep2 = new int[order2.length];
     for (int i = 0; i < order2.length; i++) rep2[i] = Integer.parseInt(order2[i]);
 
-    runExp(rep0, rep1, rep2, method, mode);
+    runExp(rep0, rep1, rep2, method);
   }
 }

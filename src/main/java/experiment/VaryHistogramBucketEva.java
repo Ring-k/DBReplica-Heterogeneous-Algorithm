@@ -26,8 +26,8 @@ public class VaryHistogramBucketEva {
     int[] cols = {1, 2, 3, 4, 11, 12, 13};
     for (int i = minBucket; i <= maxBucket; i += step) {
       System.out.println("generate table bucket = " + i);
-      DataTable dataTable = GenerateDataTable.getDataTableFromCsv("../data/lineitem_s5.csv", cols, i);
-      String filePath = "data_lineitem_s5_b" + i;
+      DataTable dataTable = GenerateDataTable.getDataTableFromCsv("../data/lineitem_s1.csv", cols, i);
+      String filePath = "data_lineitem_s1_b" + i;
       DataLoader.serialize(dataTable, filePath);
     }
   }
@@ -47,13 +47,13 @@ public class VaryHistogramBucketEva {
     int min = Integer.parseInt(args[0]), max = Integer.parseInt(args[1]), step = Integer.parseInt(args[2]);
 
     // 1. generate tables and serialize them on the disk
-    System.out.println("start generate tables");
-    generateTables(min, max, step);
-
-
-    // 2. generate queries and serialize them on the disk
-    System.out.println("start generate queries");
-    generateQueries(DataLoader.getDataTable("data_lineitem_s5_b10"), 10000, "queries_on_data_lineitem_s5_b10_n10000");
+//    System.out.println("start generate tables");
+//    generateTables(min, max, step);
+//
+//
+//    // 2. generate queries and serialize them on the disk
+//    System.out.println("start generate queries");
+//    generateQueries(DataLoader.getDataTable("data_lineitem_s1_b10"), 10000, "queries_on_data_lineitem_s1_b10_n10000");
 
 
     System.out.println("connect to cassandra and warm up");
@@ -75,9 +75,9 @@ public class VaryHistogramBucketEva {
     //            3) write/append the pair (eva_cost, real_cost) to a record_file
 
     int maxQuery = 1000;
-    Query[] queries = DataLoader.getQueries("queries_on_data_lineitem_s5_b10_n10000");
+    Query[] queries = DataLoader.getQueries("queries_on_data_lineitem_s1_b10_n10000");
     for (int i = min; i <= max; i += step) {
-      String tablePath = "data_lineitem_s5_b" + i;
+      String tablePath = "data_lineitem_s1_b" + i;
       System.out.println("try to create report file: " + "query_execution_cost_on_" + tablePath + ".csv");
       File f = new File("query_execution_cost_on_" + tablePath + ".csv");
       if (!f.exists()) f.createNewFile();
@@ -95,7 +95,7 @@ public class VaryHistogramBucketEva {
         session.execute(command);
         long realCost = System.nanoTime() - start;
         System.out.println("real cost: " + realCost);
-        fw.write(evaluateCost + "," + realCost);
+        fw.write(evaluateCost + "," + realCost + "\n");
       }
       fw.close();
     }

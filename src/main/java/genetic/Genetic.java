@@ -86,10 +86,48 @@ public class Genetic {
     this.isNewMethod = isNewMethod;
     this.crossoverRate = crossoverRate;
     this.mutationRate = mutationRate;
-    this.geneChangeNum = geneChangeNumber;
-    if (geneChangeNum <= 0 || geneChangeNum > replicaNumber)
+    if (geneChangeNumber <= 0 || geneChangeNumber > replicaNumber)
       throw new IllegalArgumentException("Gene change number greater than replica number.");
+    this.geneChangeNum = geneChangeNumber;
   }
+
+  public Genetic withReplicaNumber(int n) {
+    this.replicaNumber = n;
+    return this;
+  }
+
+  public Genetic withPopulationSize(int populationSize){
+    this.populationSize = populationSize;
+    return this;
+  }
+
+  public Genetic withMinIteration(int minIteration){
+    this.minIteration = minIteration;
+    return this;
+  }
+
+  public Genetic withMaxIteration(int maxIteration){
+    this.maxIteration = maxIteration;
+    return this;
+  }
+
+  public Genetic withCrossoverRate(double crossoverRate){
+    this.crossoverRate = crossoverRate;
+    return this;
+  }
+
+  public Genetic withMutationRate(double mutationRate){
+    this.mutationRate = mutationRate;
+    return this;
+  }
+
+  public Genetic withGeneChangeNumber(int geneChangeNum){
+    if (geneChangeNum <= 0 || geneChangeNum > replicaNumber)
+      throw new IllegalArgumentException("Initialize replica number after gene change number , or gene change number greater than replica number.");
+    this.geneChangeNum = geneChangeNum;
+    return this;
+  }
+
 
   /**
    * The GA method
@@ -102,7 +140,6 @@ public class Genetic {
     MultiReplicas[] curPopulation = init();
     int curIteration = 0;
     while (true) {
-      System.out.println(curIteration); // TODO
       // pick and copy
       curPopulation = copy(curPopulation);
       if (isTerminate(curIteration, curPopulation)) break;
@@ -361,7 +398,6 @@ public class Genetic {
         m = en.getKey();
       }
     }
-    System.out.println(CostModel.cost(m, queries) + " " + n);
     if (currentIteration < minIteration) return false;// TODO
     if (currentIteration == maxIteration) {
       multiReplicas = m;

@@ -11,7 +11,6 @@ import searchall.SearchAll;
 
 import java.math.BigDecimal;
 import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.util.*;
 
 
@@ -24,7 +23,7 @@ public class SimulateAnneal {
   private double temperature;
   private int iteration = 0;
   private int optimalCnt = 0;
-  private boolean isNewMethod = true;
+//  private boolean isNewMethod = true;
 
   // simulate annealing parameters
   private double temperatureDecreaseRate;
@@ -64,7 +63,7 @@ public class SimulateAnneal {
     this.data = dataTable;
     this.queries = queries;
     this.replicaNumber = replicaNumber;
-    this.isNewMethod = isNewMethod;
+//    this.isNewMethod = isNewMethod;
     this.temperatureDecreaseRate = Constant.TEMPERATURE_DECREASE_RATE;
     this.optimalCountThreshold = Constant.OPTIMAL_COUNT_THRESHOLD;
     this.localIterationNumber = Constant.LOCAL_ITERATION_NUM;
@@ -79,6 +78,11 @@ public class SimulateAnneal {
    */
   public SimulateAnneal withTemperatureDecreaseRate(double temperatureDecreaseRate) {
     this.temperatureDecreaseRate = temperatureDecreaseRate;
+    return this;
+  }
+
+  public SimulateAnneal withReplicaNumber(int n){
+    this.replicaNumber = n;
     return this;
   }
 
@@ -141,25 +145,24 @@ public class SimulateAnneal {
     initTemperature();
     if (multiReplicas == null)
       multiReplicas = initSolutionByOptimalReplica();
-    if (isNewMethod)
+//    if (isNewMethod)
       optimalCost = CostModel.cost(multiReplicas, queries);
-    else
-      optimalCost = CostModel.totalCost(multiReplicas, queries);
+//    else
+//      optimalCost = CostModel.totalCost(multiReplicas, queries);
     costHistory.add(optimalCost.doubleValue());
 //    CostModel.analysisEachReplica(multiReplicas, queries);// TODO print something here
 
     while (!isGlobalConverge()) {
-      System.out.println("SA { iteration: " + iteration + ", cost: " + optimalCost.setScale(10, BigDecimal.ROUND_HALF_UP).toString() + "  }"); // Print something here
       MultiReplicas curMultiReplica = new MultiReplicas(multiReplicas);
       BigDecimal curCost = optimalCost;
       while (!isLocalConverge()) {
         // generate new solution
         MultiReplicas newMultiReplica = generateNewMultiReplica(curMultiReplica);
         BigDecimal newCost;
-        if (isNewMethod) {
+//        if (isNewMethod) {
           newCost = CostModel.cost(newMultiReplica, queries);
-        } else
-          newCost = CostModel.totalCost(newMultiReplica, queries);
+//        } else
+//          newCost = CostModel.totalCost(newMultiReplica, queries);
         if (isChosen(newCost, curCost)) {
           curMultiReplica = newMultiReplica;
           curCost = newCost;
@@ -301,14 +304,13 @@ public class SimulateAnneal {
     for (int i = 0; i < 20; i++) {
       m = initSolutionRandom();
       BigDecimal curCost;
-      if (isNewMethod)
+//      if (isNewMethod)
         curCost = CostModel.cost(m, queries);
-      else
-        curCost = CostModel.totalCost(m, queries);
+//      else
+//        curCost = CostModel.totalCost(m, queries);
       if (max == null || max.compareTo(curCost) < 0) max = curCost;
       if (min == null || min.compareTo(curCost) > 0) min = curCost;
     }
-//    System.out.println("xxxxxxxxxxxxxxx");
     if (min == null) throw new NullPointerException();
     temperature = min.subtract(max)
             .divide(BigDecimal.valueOf(Math.log(temperatureInitSeed)),

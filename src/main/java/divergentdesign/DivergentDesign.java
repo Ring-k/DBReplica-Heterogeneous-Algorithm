@@ -43,7 +43,7 @@ public class DivergentDesign {
   private double optimalCost;
   private List<Double> history;
 
-  private boolean isNewMethod;
+  private boolean isNewMethod = Constant.IS_NEW_METHOD;
 
   /**
    * Constructor, using customized input variables, replica number, load balancing factor, iteration
@@ -58,11 +58,11 @@ public class DivergentDesign {
    */
   public DivergentDesign(DataTable data, Query[] queries,
                          int replicaNum, int loadBalanceFactor, int maxIteration, double epsilon, boolean isNewMethod) {
-    this.data = new DataTable(data);
     this.replicaNum = replicaNum;
     this.loadBalanceFactor = loadBalanceFactor;
     this.maxIteration = maxIteration;
     this.epsilon = epsilon;
+    this.data = new DataTable(data);
     this.workload = new Query[queries.length];
     System.arraycopy(queries, 0, workload, 0, workload.length);
     workloadSubsets = new List[replicaNum];
@@ -86,8 +86,37 @@ public class DivergentDesign {
     for (int i = 0; i < workloadSubsets.length; i++)
       workloadSubsets[i] = new ArrayList<>();
     this.history = new ArrayList<>();
-    this.isNewMethod = Constant.IS_NEW_METHOD;
   }
+
+
+  public  DivergentDesign withReplicaNumber(int m){
+    this.replicaNum = m;
+    workloadSubsets = new List[replicaNum];
+    for (int i = 0; i < workloadSubsets.length; i++)
+      workloadSubsets[i] = new ArrayList<>();
+    return this;
+  }
+
+  public DivergentDesign withLoadBalanceFactor(int m){
+    this.loadBalanceFactor = m;
+    return this;
+  }
+
+  public DivergentDesign withMaxIteration(int maxIteration){
+    this.maxIteration = maxIteration;
+    return this;
+  }
+
+  public DivergentDesign withEpsilon(double epsilon){
+    this.epsilon = epsilon;
+    return this;
+  }
+
+  public DivergentDesign withIsNewMethod(boolean isNewMethod){
+    this.isNewMethod = isNewMethod;
+    return this;
+  }
+
 
 
   /**
@@ -274,5 +303,10 @@ public class DivergentDesign {
 
   public List<Double> getHistory() {
     return history;
+  }
+
+  // TODO
+  public int getReplicaNumber() {
+    return this.replicaNum;
   }
 }

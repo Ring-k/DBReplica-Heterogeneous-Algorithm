@@ -48,7 +48,6 @@ public class CassandraSearchAllExperiment {
       curQueryNumber++;
     }
 
-
     // close session
     session.close();
     cluster.close();

@@ -49,8 +49,11 @@ public class GenerateDataTable {
       List<Double> columnValues = new ArrayList<>();
       BufferedReader reader = new BufferedReader(new FileReader(csvPath));
       if (dataTypes[i].equals(CsvDataType.DOUBLE)) {
-        while ((line = reader.readLine()) != null)
+        while ((line = reader.readLine()) != null) {
+          System.out.println(line);
+          System.out.println(Arrays.toString(line.split("\\|")));
           columnValues.add(Double.parseDouble(line.split("\\|")[curColumnIndex]));
+        }
       } else {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         while ((line = reader.readLine()) != null)

@@ -52,8 +52,8 @@ public class SearchAll {
    * @return
    */
   public MultiReplicas optimal() {
-    List<int[]> singleReplicas = Permutation.getPerm(0, dataTable.getColNum() - 1, dataTable.getColNum(), false);
-    List<int[]> replicasOrder = Permutation.getPerm(0, singleReplicas.size()-1, replicaNum, true);
+    List<int[]> singleReplicas = new Permutation().getPerm(0, dataTable.getColNum() - 1, dataTable.getColNum(), false);
+    List<int[]> replicasOrder = new Permutation().getPerm(0, singleReplicas.size()-1, replicaNum, true);
     int counter = 0;
     for (int[] ro : replicasOrder) {
       MultiReplicas m = new MultiReplicas();
@@ -75,10 +75,8 @@ public class SearchAll {
    * @return
    */
   public Replica optimalReplica(){
-    List<int[]> singleReplicas = Permutation.getPerm(0, dataTable.getColNum() - 1, dataTable.getColNum(), false);
+    List<int[]> singleReplicas = new Permutation().getPerm(0, dataTable.getColNum() - 1, dataTable.getColNum(), false);
     Replica ans = null;
-    int all = singleReplicas.size();
-    int current = 1;
     for(int[] i : singleReplicas){
       Replica r = new Replica(dataTable, i);
       BigDecimal cost = CostModel.cost(r, queries);
